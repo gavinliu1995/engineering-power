@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 
+from cache_permissions import secure_file
 
 WORKFLOW_CONTEXT_VERSION = 2
 
@@ -110,6 +111,7 @@ def write_json(path, value):
     path.write_text(
         json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    secure_file(path)
 
 
 def symbol_parts(path):
@@ -382,6 +384,7 @@ def build_workflow_context(snapshot, workflow, profile, output):
     ]
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text("\n".join(lines), encoding="utf-8")
+    secure_file(output)
 
     result = {
         "context": str(output),

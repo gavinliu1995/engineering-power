@@ -4,23 +4,25 @@
 
 - Target and input mode
 - Resolved commit, or exact base and head
-- Profile, authentication method, and cache status
-- Contract sources discovered and coverage limitations
+- `Profile: Quick` or `Profile: Deep`
+- `Collection:`, `Coverage:`, `Missing layers:`, and `Tests executed:`
+- `Report validation: {{REPOLENS_VALIDATION_STATUS}}`
+- `Total elapsed: {{REPOLENS_TOTAL_ELAPSED}}`
 
 ## Required sections
 
-### Decision summary
+## Decision Summary
 
 State the API scope, compatibility decision, highest-risk operation, required
 consumer action, and confidence.
 
-### Contract sources
+## Contract Sources
 
 List specifications, routes, controllers, schemas, DTOs, serializers,
 authentication middleware, and tests used as evidence. Classify each as
 `Fact`, `Inference`, or `Unknown`.
 
-### Operations
+## Operations
 
 Use one row per operation or message:
 
@@ -29,21 +31,21 @@ Use one row per operation or message:
 
 Use `Unknown` instead of an empty value when evidence is absent.
 
-### Schemas and validation
+## Schemas and Validation
 
 Describe cited field names, types, requiredness, validation, enums, defaults,
 and serialization names. Do not infer unobserved fields from business prose.
 
-### Compatibility findings
+## Compatibility Findings
 
 Explain every `potentially breaking` or `breaking` classification, affected
 consumers, mitigation, and unresolved compatibility questions.
 
-### Verification
+## Verification
 
 Separate executed checks, discovered API tests, and recommended contract or
 consumer tests.
 
-### Evidence index
+## Evidence Index
 
 List repository-relative citations and all collection or contract limitations.

@@ -28,6 +28,11 @@ snapshot. Keep the source repository read-only.
 7. Use the output contract in
    `../../references/dependency-impact-schema.md`. Cite important claims with
    repository-relative `path:Lx-Ly` references.
+8. Write the draft with the required runtime placeholders, then run
+   `finalize_report.py DRAFT --snapshot SNAPSHOT --profile PROFILE
+   --started-at-epoch START --report-type dependency-impact --output FINAL`.
+   Return the finalized report only; if validation fails, correct the report
+   contract rather than bypassing the validator.
 
 ## Guardrails
 

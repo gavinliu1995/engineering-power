@@ -8,6 +8,7 @@ import re
 import sys
 import time
 
+from cache_permissions import secure_file
 from collect_github_context import LAYER_ORDER, progress, select_candidates
 
 
@@ -47,6 +48,7 @@ def write_json(path, value):
     path.write_text(
         json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    secure_file(path)
 
 
 def metadata_path(output):
@@ -337,6 +339,7 @@ def build_context(snapshot, profile, output, deadline_seconds):
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text("\n".join(lines), encoding="utf-8")
+    secure_file(output)
     progress(profile, 3, 3, "Citation-ready context complete")
     return {
         "context": str(output.resolve()),

@@ -27,6 +27,8 @@ class SkillContractTests(unittest.TestCase):
             "Fact",
             "Inference",
             "Unknown",
+            "finalize_report.py",
+            "--report-type dependency-impact",
         ):
             self.assertIn(phrase, text)
 
@@ -38,6 +40,8 @@ class SkillContractTests(unittest.TestCase):
             "compatibility",
             "authentication",
             "Do not invent",
+            "finalize_report.py",
+            "--report-type api-contract",
         ):
             self.assertIn(phrase, text)
 
@@ -50,6 +54,8 @@ class SkillContractTests(unittest.TestCase):
             "user-facing",
             "executed",
             "recommended",
+            "finalize_report.py",
+            "--report-type release-notes",
         ):
             self.assertIn(phrase, text)
 

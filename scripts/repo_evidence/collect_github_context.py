@@ -20,6 +20,8 @@ import sys
 import time
 from urllib import error, parse, request
 
+from cache_permissions import secure_directory, secure_file, secure_tree
+
 
 API_ROOT = os.environ.get("GITHUB_API_URL", "https://api.github.com").rstrip("/")
 API_VERSION = "2022-11-28"
@@ -800,6 +802,7 @@ def write_json(path, value):
     path.write_text(
         json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    secure_file(path)
 
 
 def load_local_config():
@@ -916,6 +919,7 @@ def collect(args):
         cached = find_cached_snapshot(cache_parent, fingerprint)
         if cached:
             output, manifest = cached
+            secure_tree(output)
             progress(args.profile, 4, 4, "Cache hit; reusing collected evidence")
             return output, cache_manifest_result(
                 manifest, True, time.monotonic() - started_at
@@ -931,8 +935,13 @@ def collect(args):
     if output.exists() and any(output.iterdir()):
         raise RuntimeError(f"Output directory is not empty: {output}")
     output.mkdir(parents=True, exist_ok=True)
+    if not args.output:
+        secure_directory(cache_parent.parent)
+        secure_directory(cache_parent)
+    secure_directory(output)
     files_root = output / "files"
     files_root.mkdir()
+    secure_directory(files_root)
 
     progress(args.profile, 3, 4, "Sampling architecture layers and collecting files")
     tree_response = client.json(
@@ -1006,7 +1015,9 @@ def collect(args):
                     )
                     continue
                 destination.parent.mkdir(parents=True, exist_ok=True)
+                secure_directory(destination.parent)
                 destination.write_bytes(raw)
+                secure_file(destination)
                 collected_files.append(collected)
 
     collected_files.sort(key=lambda item: item["path"])
@@ -1040,6 +1051,7 @@ def collect(args):
         size = "" if entry.get("size") is None else str(entry.get("size"))
         tree_lines.append(f"{entry.get('type', '')}\t{size}\t{entry.get('path', '')}")
     (output / "tree.txt").write_text("\n".join(tree_lines) + "\n", encoding="utf-8")
+    secure_file(output / "tree.txt")
 
     if changed_files:
         safe_changed_files = []
@@ -1066,6 +1078,7 @@ def collect(args):
         (output / "pull-request.patch").write_text(
             "\n\n".join(patch_sections) + "\n", encoding="utf-8"
         )
+        secure_file(output / "pull-request.patch")
 
     write_json(output / "recent-commits.json", recent_commits)
     selection["deadline_reached"] = deadline_reached
@@ -1111,6 +1124,7 @@ def collect(args):
         "warnings": warnings,
     }
     write_json(output / "manifest.json", manifest)
+    secure_tree(output)
     progress(args.profile, 4, 4, "Evidence snapshot ready")
     return output.resolve(), cache_manifest_result(
         manifest, False, time.monotonic() - started_at

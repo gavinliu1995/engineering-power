@@ -29,6 +29,42 @@ PULL_REQUEST_HEADINGS = {
     "Evidence Index",
 }
 
+SPECIALIZED_REPORT_HEADINGS = {
+    "dependency-impact": {
+        "Decision Summary",
+        "Changed or Requested Surface",
+        "Dependency Propagation",
+        "Transitive Impact",
+        "Test Impact",
+        "Regression Risks",
+        "Evidence Index",
+    },
+    "api-contract": {
+        "Decision Summary",
+        "Contract Sources",
+        "Operations",
+        "Schemas and Validation",
+        "Compatibility Findings",
+        "Verification",
+        "Evidence Index",
+    },
+    "release-notes": {
+        "Decision Summary",
+        "User-facing Release Notes",
+        "Technical Release Notes",
+        "Required Actions",
+        "Validation Status",
+        "Risks and Compatibility",
+        "Evidence Index",
+    },
+}
+
+REPORT_TYPES = (
+    "repository",
+    "pull-request",
+    *SPECIALIZED_REPORT_HEADINGS,
+)
+
 CITATION_PATTERN = re.compile(
     r"`(?P<path>[^`\n:]+(?:/[^`\n:]+)*):(?P<start>\d+)"
     r"(?:-(?P<end>\d+))?`"
@@ -51,6 +87,11 @@ def parse_args():
     )
     parser.add_argument("report", help="Markdown report path")
     parser.add_argument("--snapshot", required=True, help="Collector snapshot directory")
+    parser.add_argument(
+        "--report-type",
+        choices=REPORT_TYPES,
+        help="Report contract; defaults to the repository or pull-request snapshot mode",
+    )
     return parser.parse_args()
 
 
@@ -71,6 +112,96 @@ def resolve_evidence_path(snapshot, files_root, relative_path):
     return source_path, None
 
 
+def section_body(report, heading):
+    match = re.search(
+        rf"^##\s+{re.escape(heading)}\s*$\n(.*?)(?=^##\s+|\Z)",
+        report,
+        re.MULTILINE | re.DOTALL,
+    )
+    return match.group(1) if match else ""
+
+
+def require_table_headers(report, heading, required_headers, errors):
+    section = section_body(report, heading)
+    header_line = next(
+        (line for line in section.splitlines() if line.strip().startswith("|")),
+        "",
+    )
+    headers = {
+        cell.strip().casefold()
+        for cell in header_line.strip().strip("|").split("|")
+        if cell.strip()
+    }
+    missing = [header for header in required_headers if header.casefold() not in headers]
+    if missing:
+        errors.append(
+            f"{heading} table is missing required columns: {', '.join(missing)}"
+        )
+
+
+def require_validation_categories(report, heading, errors):
+    section = section_body(report, heading)
+    missing = [
+        label
+        for label in ("Executed", "Discovered", "Recommended")
+        if not re.search(rf"\b{label}\b", section, re.IGNORECASE)
+    ]
+    if missing:
+        errors.append(
+            f"{heading} must separate executed, discovered, and recommended validation; "
+            f"missing: {', '.join(missing)}"
+        )
+
+
+def specialized_contract_errors(report, report_type):
+    errors = []
+    if report_type == "dependency-impact":
+        require_table_headers(
+            report,
+            "Dependency Propagation",
+            ("Source", "Direction", "Target", "Effect", "Classification", "Evidence"),
+            errors,
+        )
+        propagation = section_body(report, "Dependency Propagation")
+        if not re.search(r"\b(?:Fact|Inference|Unknown)\b", propagation):
+            errors.append(
+                "Dependency Propagation must classify evidence as Fact, Inference, or Unknown"
+            )
+        require_validation_categories(report, "Test Impact", errors)
+    elif report_type == "api-contract":
+        require_table_headers(
+            report,
+            "Operations",
+            (
+                "Change",
+                "Method or kind",
+                "Path or name",
+                "Input",
+                "Output",
+                "Authentication",
+                "Compatibility",
+                "Evidence",
+            ),
+            errors,
+        )
+        sources = section_body(report, "Contract Sources")
+        if not re.search(r"\b(?:Fact|Inference|Unknown)\b", sources):
+            errors.append(
+                "Contract Sources must classify evidence as Fact, Inference, or Unknown"
+            )
+        operations = section_body(report, "Operations")
+        if not re.search(
+            r"\b(?:added|removed|compatible|potentially breaking|breaking|Unknown)\b",
+            operations,
+            re.IGNORECASE,
+        ):
+            errors.append("Operations must include an explicit compatibility classification")
+        require_validation_categories(report, "Verification", errors)
+    elif report_type == "release-notes":
+        require_validation_categories(report, "Validation Status", errors)
+    return errors
+
+
 def validate(args):
     report_path = Path(args.report).expanduser().resolve()
     snapshot = Path(args.snapshot).expanduser().resolve()
@@ -87,20 +218,32 @@ def validate(args):
     if mode not in {"repository", "pull-request"}:
         raise RuntimeError(f"Unsupported snapshot mode: {mode}")
 
+    report_type = getattr(args, "report_type", None) or mode
+    if report_type not in REPORT_TYPES:
+        raise RuntimeError(f"Unsupported report type: {report_type}")
+
     report = report_path.read_text(encoding="utf-8")
     headings = set(HEADING_PATTERN.findall(report))
-    required_headings = (
-        REPOSITORY_HEADINGS if mode == "repository" else PULL_REQUEST_HEADINGS
-    )
+    if report_type == "repository":
+        required_headings = REPOSITORY_HEADINGS
+    elif report_type == "pull-request":
+        required_headings = PULL_REQUEST_HEADINGS
+    else:
+        required_headings = SPECIALIZED_REPORT_HEADINGS[report_type]
     errors = []
     warnings = []
 
     missing_headings = sorted(required_headings - headings)
     if missing_headings:
         errors.append("Missing required sections: " + ", ".join(missing_headings))
+    if report_type in SPECIALIZED_REPORT_HEADINGS:
+        errors.extend(specialized_contract_errors(report, report_type))
 
     diagrams = MERMAID_PATTERN.findall(report)
-    minimum_diagrams = 2 if mode == "repository" else 1
+    minimum_diagrams = {
+        "repository": 2,
+        "pull-request": 1,
+    }.get(report_type, 0)
     if len(diagrams) < minimum_diagrams:
         errors.append(
             f"Expected at least {minimum_diagrams} Mermaid diagram(s); found {len(diagrams)}"
@@ -120,7 +263,7 @@ def validate(args):
             errors.append(f"Mermaid diagram {index} contains a nested code fence")
 
     citations = list(CITATION_PATTERN.finditer(report))
-    minimum_citations = 5 if mode == "repository" else 3
+    minimum_citations = 5 if report_type == "repository" else 3
     valid_citations = 0
     checked_paths = {}
     for citation in citations:
@@ -162,7 +305,7 @@ def validate(args):
     if "Confidence:" not in report:
         warnings.append("Report contains no explicit confidence labels")
 
-    return mode, diagrams, valid_citations, errors, warnings
+    return report_type, diagrams, valid_citations, errors, warnings
 
 
 def main():

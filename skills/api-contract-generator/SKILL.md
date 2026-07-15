@@ -26,6 +26,11 @@ support. Keep the source repository read-only.
    authentication and authorization evidence, versioning, compatibility, and
    citations. Mark absent evidence as **Unknown**.
 7. Format the result with `../../references/api-contract-schema.md`.
+8. Write the draft with the required runtime placeholders, then run
+   `finalize_report.py DRAFT --snapshot SNAPSHOT --profile PROFILE
+   --started-at-epoch START --report-type api-contract --output FINAL`.
+   Return the finalized report only; if validation fails, correct the report
+   contract rather than bypassing the validator.
 
 ## Guardrails
 

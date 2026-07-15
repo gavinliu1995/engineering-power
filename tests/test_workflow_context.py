@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import stat
 import sys
 import tempfile
 import unittest
@@ -77,6 +78,9 @@ class WorkflowContextTests(unittest.TestCase):
 
         result = build_workflow_context(
             self.snapshot, "api-contract", "quick", self.snapshot / "api.md"
+        )
+        self.assertEqual(
+            stat.S_IMODE((self.snapshot / "api.md").stat().st_mode), 0o600
         )
 
         text = Path(result["context"]).read_text(encoding="utf-8")

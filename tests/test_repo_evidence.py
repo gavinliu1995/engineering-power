@@ -2,6 +2,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import stat
 import sys
 import tempfile
 import time
@@ -232,6 +233,27 @@ class LocalCollectionTests(unittest.TestCase):
             self.assertTrue((output / "files" / "app.py").is_file())
             self.assertFalse((output / "files" / "tests" / "test_app.py").exists())
 
+    def test_collected_snapshot_is_private_without_changing_explicit_parent(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, _, _ = self.create_repository(root)
+            explicit_parent = root / "exports"
+            explicit_parent.mkdir(mode=0o755)
+            explicit_parent.chmod(0o755)
+
+            output, _ = local_collector.collect(
+                self.args(repository, explicit_parent / "snapshot", ref="main")
+            )
+
+            self.assertEqual(stat.S_IMODE(explicit_parent.stat().st_mode), 0o755)
+            self.assertEqual(stat.S_IMODE(output.stat().st_mode), 0o700)
+            self.assertEqual(stat.S_IMODE((output / "files").stat().st_mode), 0o700)
+            for path in output.rglob("*"):
+                if path.is_symlink():
+                    continue
+                expected = 0o700 if path.is_dir() else 0o600
+                self.assertEqual(stat.S_IMODE(path.stat().st_mode), expected, str(path))
+
     def test_git_range_collects_changed_tex_release_notes(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -381,6 +403,7 @@ class LocalCollectionTests(unittest.TestCase):
             self.assertIn("`app.py`", context)
             self.assertIn("Citation: `README.md:1-3`", context)
             self.assertIn("     1 | # Local Product", context)
+            self.assertEqual(stat.S_IMODE(output.stat().st_mode), 0o600)
             self.assertLessEqual(
                 len(context), prepare_analysis_context.CONTEXT_DEFAULTS["quick"]["max_chars"]
             )
@@ -715,6 +738,114 @@ class ReportFinalizationTests(unittest.TestCase):
         errors = finalize_report.profile_errors(report, "quick")
         self.assertTrue(any("exceeds" in error for error in errors))
 
+    def create_specialized_report(self, root, report_type):
+        snapshot = root / "snapshot"
+        files = snapshot / "files"
+        files.mkdir(parents=True)
+        (files / "app.py").write_text("one\ntwo\nthree\n", encoding="utf-8")
+        (snapshot / "manifest.json").write_text(
+            json.dumps({"mode": "pull-request", "resolved_ref": "abc123"}),
+            encoding="utf-8",
+        )
+        sections = {
+            "dependency-impact": (
+                "## Decision Summary\n\nConfidence: High. `app.py:1`\n\n"
+                "## Changed or Requested Surface\n\n`app.py:1`\n\n"
+                "## Dependency Propagation\n\n"
+                "| Source | Direction | Target | Effect | Classification | Evidence |\n"
+                "|---|---|---|---|---|---|\n"
+                "| app | consumed-by | test | behavior | Fact | `app.py:1` |\n\n"
+                "## Transitive Impact\n\nNone observed. `app.py:2`\n\n"
+                "## Test Impact\n\nExecuted: none. Discovered: app test. Recommended: run it.\n\n"
+                "## Regression Risks\n\nLow. `app.py:3`\n\n"
+                "## Evidence Index\n\n- `app.py:1`\n- `app.py:2`\n- `app.py:3`\n"
+            ),
+            "api-contract": (
+                "## Decision Summary\n\nConfidence: High. `app.py:1`\n\n"
+                "## Contract Sources\n\nFact: route source. `app.py:1`\n\n"
+                "## Operations\n\n"
+                "| Change | Method or kind | Path or name | Input | Output | Authentication | Compatibility | Evidence |\n"
+                "|---|---|---|---|---|---|---|---|\n"
+                "| added | GET | /v1/x | Unknown | value | Unknown | compatible | `app.py:1` |\n\n"
+                "## Schemas and Validation\n\nUnknown. `app.py:2`\n\n"
+                "## Compatibility Findings\n\nCompatible. `app.py:3`\n\n"
+                "## Verification\n\nExecuted: none. Discovered: route test. Recommended: contract test.\n\n"
+                "## Evidence Index\n\n- `app.py:1`\n- `app.py:2`\n- `app.py:3`\n"
+            ),
+            "release-notes": (
+                "## Decision Summary\n\nConfidence: High. `app.py:1`\n\n"
+                "## User-facing Release Notes\n\nNo supported user-facing change. `app.py:1`\n\n"
+                "## Technical Release Notes\n\nInternal behavior changed. `app.py:2`\n\n"
+                "## Required Actions\n\nNone discovered.\n\n"
+                "## Validation Status\n\nExecuted: none.\n\nDiscovered: app test.\n\nRecommended: run app test.\n\n"
+                "## Risks and Compatibility\n\nLow. `app.py:3`\n\n"
+                "## Evidence Index\n\n- `app.py:1`\n- `app.py:2`\n- `app.py:3`\n"
+            ),
+        }
+        draft = root / f"{report_type}.md"
+        draft.write_text(
+            "# Specialized Report\n\n"
+            "Analyzed commit: abc123  \n"
+            "Profile: Quick  \n"
+            "Collection: cache hit  \n"
+            "Coverage: bounded snapshot  \n"
+            "Missing layers: none  \n"
+            "Tests executed: no  \n"
+            f"Report validation: {finalize_report.VALIDATION_PLACEHOLDER}  \n"
+            f"Total elapsed: {finalize_report.ELAPSED_PLACEHOLDER}\n\n"
+            + sections[report_type],
+            encoding="utf-8",
+        )
+        return snapshot, draft
+
+    def test_specialized_report_types_pass_their_quality_gates(self):
+        for report_type in ("dependency-impact", "api-contract", "release-notes"):
+            with self.subTest(report_type=report_type), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                snapshot, report = self.create_specialized_report(root, report_type)
+                kind, diagrams, citations, errors, _ = validate_report.validate(
+                    SimpleNamespace(
+                        report=str(report), snapshot=str(snapshot), report_type=report_type
+                    )
+                )
+                self.assertEqual(kind, report_type)
+                self.assertEqual(diagrams, [])
+                self.assertGreaterEqual(citations, 3)
+                self.assertEqual(errors, [])
+
+    def test_specialized_report_rejects_missing_semantic_contract(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            snapshot, report = self.create_specialized_report(root, "dependency-impact")
+            content = report.read_text(encoding="utf-8").replace(
+                "| Source | Direction | Target | Effect | Classification | Evidence |",
+                "| Source | Target | Evidence |",
+            )
+            report.write_text(content, encoding="utf-8")
+            _, _, _, errors, _ = validate_report.validate(
+                SimpleNamespace(
+                    report=str(report),
+                    snapshot=str(snapshot),
+                    report_type="dependency-impact",
+                )
+            )
+            self.assertTrue(any("Dependency Propagation" in error for error in errors))
+
+    def test_finalizer_records_specialized_report_type(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            snapshot, draft = self.create_specialized_report(root, "api-contract")
+            result = finalize_report.finalize(
+                draft,
+                snapshot,
+                "quick",
+                time.time() - 1,
+                root / "final.md",
+                report_type="api-contract",
+            )
+            self.assertEqual(result["report_type"], "api-contract")
+            self.assertEqual(result["validation"], "passed")
+
 
 class CacheManagementTests(unittest.TestCase):
     def create_snapshot(
@@ -839,6 +970,30 @@ class CacheManagementTests(unittest.TestCase):
             root.mkdir()
             (root / "external-link").symlink_to(outside, target_is_directory=True)
             self.assertEqual(manage_cache.find_snapshots(root), [])
+
+    def test_permission_audit_and_fix_secure_existing_cache_without_following_symlinks(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary)
+            root = base / "cache"
+            snapshot = self.create_snapshot(root, "repository-old", time.time())
+            outside = base / "outside.txt"
+            outside.write_text("do not touch", encoding="utf-8")
+            outside.chmod(0o644)
+            (snapshot / "outside-link").symlink_to(outside)
+            root.chmod(0o755)
+            snapshot.chmod(0o755)
+            (snapshot / "manifest.json").chmod(0o644)
+
+            audit = manage_cache.audit_cache_permissions(root)
+            self.assertGreater(audit["insecure_entries"], 0)
+            fixed = manage_cache.secure_cache_permissions(root)
+            self.assertEqual(fixed["remaining_insecure_entries"], 0)
+            self.assertEqual(stat.S_IMODE(root.stat().st_mode), 0o700)
+            self.assertEqual(stat.S_IMODE(snapshot.stat().st_mode), 0o700)
+            self.assertEqual(
+                stat.S_IMODE((snapshot / "manifest.json").stat().st_mode), 0o600
+            )
+            self.assertEqual(stat.S_IMODE(outside.stat().st_mode), 0o644)
 
 
 if __name__ == "__main__":

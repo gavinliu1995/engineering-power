@@ -93,12 +93,14 @@ def profile_errors(report, profile, mode=None):
     return errors
 
 
-def finalize(draft, snapshot, profile, started_at_epoch, output):
+def finalize(draft, snapshot, profile, started_at_epoch, output, report_type=None):
     if started_at_epoch <= 0:
         raise RuntimeError("--started-at-epoch must be greater than zero")
     report = draft.read_text(encoding="utf-8")
     mode, diagrams, citations, errors, warnings = validate_report.validate(
-        SimpleNamespace(report=str(draft), snapshot=str(snapshot))
+        SimpleNamespace(
+            report=str(draft), snapshot=str(snapshot), report_type=report_type
+        )
     )
     errors.extend(profile_errors(report, profile, mode))
     if errors:
@@ -127,18 +129,24 @@ def finalize(draft, snapshot, profile, started_at_epoch, output):
 
     final_mode, final_diagrams, final_citations, final_errors, final_warnings = (
         validate_report.validate(
-            SimpleNamespace(report=str(output), snapshot=str(snapshot))
+            SimpleNamespace(
+                report=str(output), snapshot=str(snapshot), report_type=report_type
+            )
         )
     )
     if final_errors:
         output.unlink(missing_ok=True)
         raise RuntimeError("Final report validation failed: " + "; ".join(final_errors))
 
+    snapshot_mode = json.loads(
+        (Path(snapshot) / "manifest.json").read_text(encoding="utf-8")
+    ).get("mode")
     return {
         "report": str(output.resolve()),
         "profile": profile,
         "validation": validation_status,
-        "mode": final_mode,
+        "mode": snapshot_mode,
+        "report_type": final_mode,
         "diagrams": len(final_diagrams),
         "citations": final_citations,
         "report_characters": len(finalized),
@@ -157,6 +165,11 @@ def parse_args():
     parser.add_argument("--snapshot", required=True, help="Collector snapshot directory")
     parser.add_argument("--profile", choices=sorted(PROFILE_RULES), required=True)
     parser.add_argument("--started-at-epoch", type=float, required=True)
+    parser.add_argument(
+        "--report-type",
+        choices=validate_report.REPORT_TYPES,
+        help="Report contract; defaults to the snapshot mode",
+    )
     parser.add_argument("--output", help="Final Markdown path; defaults to replacing draft")
     return parser.parse_args()
 
@@ -171,7 +184,12 @@ def main():
         else draft
     )
     result = finalize(
-        draft, snapshot, args.profile, args.started_at_epoch, output
+        draft,
+        snapshot,
+        args.profile,
+        args.started_at_epoch,
+        output,
+        report_type=args.report_type,
     )
     print(json.dumps(result, ensure_ascii=False))
 

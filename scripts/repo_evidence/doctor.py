@@ -17,7 +17,12 @@ from collect_github_context import (
     parse_target,
 )
 from collect_local_context import repository_root
-from manage_cache import cache_root, retention_policy, summarize_cache
+from manage_cache import (
+    audit_cache_permissions,
+    cache_root,
+    retention_policy,
+    summarize_cache,
+)
 
 
 def add_check(checks, name, status, detail):
@@ -150,6 +155,19 @@ def main():
         "ok",
         f"{cache['snapshot_count']} snapshot(s), {cache['total_bytes']} byte(s)",
     )
+    cache_permissions = audit_cache_permissions(cache_root())
+    insecure_entries = cache_permissions["insecure_entries"]
+    add_check(
+        checks,
+        "cache-permissions",
+        "warning" if insecure_entries else "ok",
+        (
+            f"{insecure_entries} cache path(s) are not private; run "
+            "manage_cache.py permissions --fix"
+            if insecure_entries
+            else "Cache directories are 700 and evidence files are 600"
+        ),
+    )
     try:
         policy = retention_policy()
         add_check(
@@ -224,6 +242,15 @@ def main():
             )
         },
         "cache_retention": policy,
+        "cache_permissions": {
+            key: cache_permissions[key]
+            for key in (
+                "directories_checked",
+                "files_checked",
+                "symlinks_skipped",
+                "insecure_entries",
+            )
+        },
     }
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 1 if overall == "error" else 0

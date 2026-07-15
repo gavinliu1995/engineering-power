@@ -28,6 +28,8 @@ Include these commands with short explanations:
 /repolens doctor REPO_URL
 /repolens doctor /path/to/repository
 /repolens cache status
+/repolens cache permissions
+/repolens cache permissions --fix
 /repolens cache prune
 /repolens cache clean DAYS
 /repolens cache clean all
@@ -64,8 +66,11 @@ Also state:
 - Reports render inline by default; save only on explicit request.
 - Public repositories need no installation. Private repositories must be
   selected in the GitHub App installation.
-- `doctor` checks the runtime, authentication, cache, and optional repository
-  access without exposing credentials.
+- `doctor` checks the runtime, authentication, private cache permissions, and
+  optional repository access without exposing credentials.
+- Evidence-cache directories use mode `700` and files use mode `600`.
+  `cache permissions` audits existing snapshots; add `--fix` to repair only
+  permissions without deleting or changing evidence content.
 - Cache cleanup always shows a dry run and requires confirmation before deleting
   evidence snapshots.
 - `cache prune` applies the configured age and per-target snapshot limits, also

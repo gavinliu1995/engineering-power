@@ -14,6 +14,8 @@ import sys
 import time
 from urllib import parse
 
+from cache_permissions import secure_directory, secure_file, secure_tree
+
 from collect_github_context import (
     PROFILE_DEFAULTS,
     SELECTION_POLICY_VERSION,
@@ -576,6 +578,7 @@ def collect(args):
         cached = find_cached_snapshot(cache_parent(repository), fingerprint)
         if cached:
             output, manifest = cached
+            secure_tree(output)
             progress(args.profile, 4, 4, "Cache hit; reusing collected evidence")
             return output, cache_manifest_result(
                 manifest, True, time.monotonic() - started_at
@@ -601,8 +604,14 @@ def collect(args):
     if output.exists() and any(output.iterdir()):
         raise RuntimeError(f"Output directory is not empty: {output}")
     output.mkdir(parents=True, exist_ok=True)
+    if not args.output:
+        managed_root = cache_parent(repository).parent
+        secure_directory(managed_root)
+        secure_directory(cache_parent(repository))
+    secure_directory(output)
     files_root = output / "files"
     files_root.mkdir()
+    secure_directory(files_root)
     files_root_resolved = files_root.resolve()
 
     progress(args.profile, 3, 4, "Sampling architecture layers and collecting files")
@@ -619,7 +628,9 @@ def collect(args):
             if not str(destination).startswith(str(files_root_resolved) + os.sep):
                 raise RuntimeError("Unsafe repository path")
             destination.parent.mkdir(parents=True, exist_ok=True)
+            secure_directory(destination.parent)
             destination.write_bytes(raw)
+            secure_file(destination)
             collected_files.append(
                 {
                     "path": entry["path"],
@@ -639,11 +650,13 @@ def collect(args):
     (output / "tree.txt").write_text(
         "\n".join(tree_lines) + "\n", encoding="utf-8"
     )
+    secure_file(output / "tree.txt")
     write_json(output / "recent-commits.json", recent_commits(repository, resolved_ref))
 
     if mode == "pull-request":
         write_json(output / "pull-request-files.json", changed_files)
         (output / "pull-request.patch").write_bytes(patch or b"")
+        secure_file(output / "pull-request.patch")
 
     selection["layer_planned"] = dict(selection["layer_selected"])
     selection["layer_selected"] = {
@@ -721,6 +734,7 @@ def collect(args):
         "warnings": warnings,
     }
     write_json(output / "manifest.json", manifest)
+    secure_tree(output)
     progress(args.profile, 4, 4, "Evidence snapshot ready")
     return output.resolve(), cache_manifest_result(
         manifest, False, time.monotonic() - started_at

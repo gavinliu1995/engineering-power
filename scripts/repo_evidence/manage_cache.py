@@ -10,6 +10,8 @@ import shutil
 import sys
 import time
 
+from cache_permissions import audit_tree, secure_tree
+
 
 DEFAULT_CACHE_PATH = "~/.cache/repolens"
 DEFAULT_CONFIG_PATH = "~/.config/repolens/config.json"
@@ -151,6 +153,26 @@ def summarize_cache(root):
     }
 
 
+def audit_cache_permissions(root):
+    return audit_tree(Path(root).expanduser())
+
+
+def secure_cache_permissions(root):
+    root = Path(root).expanduser()
+    before = audit_tree(root)
+    secured = secure_tree(root)
+    after = audit_tree(root)
+    return {
+        "cache_root": str(root.resolve()),
+        "fixed_entries": before["insecure_entries"],
+        "insecure_entries": after["insecure_entries"],
+        "remaining_insecure_entries": after["insecure_entries"],
+        "symlinks_skipped": secured["symlinks_skipped"],
+        "directories_secured": secured["directories"],
+        "files_secured": secured["files"],
+    }
+
+
 def select_snapshots(snapshots, older_than_days=None, delete_all=False, now=None):
     if delete_all:
         return list(snapshots)
@@ -229,6 +251,14 @@ def parse_args():
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("status", help="Show cache usage and snapshots")
+    permissions_parser = subparsers.add_parser(
+        "permissions", help="Audit private cache permissions or repair them"
+    )
+    permissions_parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="Set cache directories to 700 and evidence files to 600",
+    )
 
     clean_parser = subparsers.add_parser(
         "clean", help="Preview or delete matching snapshots"
@@ -278,6 +308,14 @@ def main():
     if args.command == "status":
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return 0
+    if args.command == "permissions":
+        result = (
+            secure_cache_permissions(root)
+            if args.fix
+            else audit_cache_permissions(root)
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0 if not result.get("insecure_entries") else 1
 
     if args.command == "prune":
         overrides = {

@@ -28,6 +28,11 @@ source repository read-only and make unsupported product claims explicit.
    and risk information when supported. Mark missing evidence as **Unknown**.
 8. Format the result with `../../references/release-note-schema.md` and cite
    important claims with repository-relative `path:Lx-Ly` references.
+9. Write the draft with the required runtime placeholders, then run
+   `finalize_report.py DRAFT --snapshot SNAPSHOT --profile PROFILE
+   --started-at-epoch START --report-type release-notes --output FINAL`.
+   Return the finalized report only; if validation fails, correct the report
+   contract rather than bypassing the validator.
 
 ## Guardrails
 
