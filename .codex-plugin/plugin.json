@@ -1,0 +1,18 @@
+{
+  "name": "engineering-power",
+  "version": "0.1.0",
+  "description": "Evidence-backed engineering workflows for repository understanding, PR analysis, planning, testing, review, and release decisions.",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Engineering Power",
+    "shortDescription": "Engineering workflows grounded in real code evidence.",
+    "longDescription": "Engineering Power combines structured software-engineering workflows with shared repository, PR, local Git, and offline diff intelligence.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": ["repository intelligence", "PR impact analysis", "architecture mapping", "developer onboarding", "release readiness"],
+    "defaultPrompt": "Use Engineering Power to understand this repository or plan a safe engineering change."
+  }
+}
