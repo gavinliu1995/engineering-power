@@ -41,6 +41,18 @@ class SkillContractTests(unittest.TestCase):
         ):
             self.assertIn(phrase, text)
 
+    def test_release_note_skill_contract(self):
+        text = skill_text("release-note-generator")
+        for phrase in (
+            "prepare_workflow_context.py",
+            "release-notes",
+            "technical",
+            "user-facing",
+            "executed",
+            "recommended",
+        ):
+            self.assertIn(phrase, text)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release Note Generator"
+  short_description: "Generate technical and user-facing notes from evidence."
+  default_prompt: "Use $release-note-generator to generate evidence-backed release notes for this change."
