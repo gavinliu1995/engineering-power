@@ -53,6 +53,7 @@ class PluginLayoutTests(unittest.TestCase):
             "collect_github_context.py",
             "collect_local_context.py",
             "prepare_analysis_context.py",
+            "prepare_workflow_context.py",
             "validate_report.py",
             "finalize_report.py",
             "manage_cache.py",
