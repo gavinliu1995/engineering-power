@@ -51,6 +51,9 @@ Also state:
 - Every delivered report is finalized with citation/diagram validation and
   displays the measured total elapsed time. The validation badge is generated
   by the finalizer, not claimed by the model.
+- A report that is structurally valid but finishes after its profile deadline is
+  marked `passed-with-deadline-limit`, returned with the available evidence, and
+  must not be presented as an unrestricted `passed` report.
 - Repository URLs produce repository intelligence reports.
 - URLs ending in `/pull/NUMBER` produce PR impact reports.
 - A local path produces the same report workflow without network authentication.

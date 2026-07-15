@@ -21,7 +21,7 @@ class WorkflowContextTests(unittest.TestCase):
     def tearDown(self):
         self.temporary.cleanup()
 
-    def write_snapshot(self, files):
+    def write_snapshot(self, files, declared_changed_paths=None):
         collected = []
         for path, content, changed in files:
             target = self.snapshot / "files" / path
@@ -46,6 +46,20 @@ class WorkflowContextTests(unittest.TestCase):
         }
         (self.snapshot / "manifest.json").write_text(
             json.dumps(manifest), encoding="utf-8"
+        )
+        changed_paths = (
+            declared_changed_paths
+            if declared_changed_paths is not None
+            else [path for path, _, changed in files if changed]
+        )
+        (self.snapshot / "pull-request-files.json").write_text(
+            json.dumps(
+                [
+                    {"filename": path, "status": "modified"}
+                    for path in changed_paths
+                ]
+            ),
+            encoding="utf-8",
         )
 
     def test_api_contract_context_prioritizes_routes_and_schemas(self):
@@ -89,6 +103,99 @@ class WorkflowContextTests(unittest.TestCase):
 
         self.assertEqual(result["selected_files"][0], "pom.xml")
         self.assertFalse(result["truncated"])
+
+    def test_quick_context_keeps_all_changed_files_before_support_budget(self):
+        files = [
+            (
+                f"src/feature/Changed{index}.java",
+                f"class Changed{index} {{}}\n",
+                True,
+            )
+            for index in range(15)
+        ]
+        files.append(("README.md", "general setup only\n", False))
+        self.write_snapshot(files)
+
+        result = build_workflow_context(
+            self.snapshot,
+            "release-notes",
+            "quick",
+            self.snapshot / "release.md",
+        )
+
+        self.assertEqual(result["changed_files_total"], 15)
+        self.assertEqual(result["changed_files_selected"], 15)
+        self.assertEqual(result["changed_files_missing_from_snapshot"], [])
+        self.assertTrue(
+            all(path in result["selected_files"] for path, _, _ in files[:15])
+        )
+
+    def test_api_context_does_not_fill_budget_with_irrelevant_files(self):
+        self.write_snapshot(
+            [
+                ("scripts/connect.sh", "ssh target\n", True),
+                ("README.md", "general setup only\n", False),
+                (".gitignore", "*.log\n", False),
+            ]
+        )
+
+        result = build_workflow_context(
+            self.snapshot, "api-contract", "quick", self.snapshot / "api.md"
+        )
+
+        self.assertEqual(result["selected_files"], ["scripts/connect.sh"])
+        self.assertFalse(result["truncated"])
+        self.assertEqual(result["relevant_supporting_candidates"], 0)
+
+    def test_changed_symbol_affinity_prioritizes_related_test(self):
+        self.write_snapshot(
+            [
+                (
+                    "src/OrderController.java",
+                    '@GetMapping("/orders")\nOrderDto list() {}\n',
+                    True,
+                ),
+                ("src/AaaDto.java", "record AaaDto(String id) {}\n", False),
+                (
+                    "tests/ZzzOrderControllerTest.java",
+                    "class ZzzOrderControllerTest {}\n",
+                    False,
+                ),
+            ]
+        )
+
+        result = build_workflow_context(
+            self.snapshot, "api-contract", "quick", self.snapshot / "api.md"
+        )
+
+        self.assertEqual(
+            result["selected_files"][:2],
+            ["src/OrderController.java", "tests/ZzzOrderControllerTest.java"],
+        )
+
+    def test_declared_changed_file_missing_from_snapshot_is_disclosed(self):
+        self.write_snapshot(
+            [("src/OrderController.java", "class OrderController {}\n", True)],
+            declared_changed_paths=[
+                "src/OrderController.java",
+                "docs/release-notes.tex",
+            ],
+        )
+
+        result = build_workflow_context(
+            self.snapshot,
+            "release-notes",
+            "quick",
+            self.snapshot / "release.md",
+        )
+
+        self.assertEqual(
+            result["changed_files_missing_from_snapshot"],
+            ["docs/release-notes.tex"],
+        )
+        self.assertTrue(
+            any("not present" in item.lower() for item in result["limitations"])
+        )
 
     def test_manifest_path_cannot_escape_snapshot_files(self):
         self.write_snapshot([])

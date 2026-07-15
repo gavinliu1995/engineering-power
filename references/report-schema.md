@@ -50,6 +50,11 @@ Report validation: {{REPOLENS_VALIDATION_STATUS}}
 Total elapsed: {{REPOLENS_TOTAL_ELAPSED}}
 ```
 
+The finalizer replaces the validation placeholder with `passed` only when the
+report finishes within its profile deadline. A structurally valid late report
+uses `passed-with-deadline-limit` and must disclose potentially incomplete
+coverage.
+
 Quick requirements:
 
 - Maximum 10,000 Markdown characters, enforced by the finalizer.

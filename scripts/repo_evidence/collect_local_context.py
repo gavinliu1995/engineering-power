@@ -657,6 +657,18 @@ def collect(args):
         and selection["layer_candidates"].get(layer)
         and not selection["layer_selected"].get(layer)
     ]
+    selection["unavailable_layers"] = [
+        layer
+        for layer in selection["layer_candidates"]
+        if layer != "other" and not selection["layer_candidates"].get(layer)
+    ]
+    collected_paths = {item["path"] for item in collected_files}
+    selection["changed_collected"] = sum(
+        1 for path in collected_paths if path in changed_paths
+    )
+    selection["changed_files_missing_from_snapshot"] = sorted(
+        changed_paths - collected_paths
+    )
 
     if deadline_reached:
         warnings.append(

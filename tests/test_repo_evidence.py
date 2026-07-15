@@ -232,6 +232,36 @@ class LocalCollectionTests(unittest.TestCase):
             self.assertTrue((output / "files" / "app.py").is_file())
             self.assertFalse((output / "files" / "tests" / "test_app.py").exists())
 
+    def test_git_range_collects_changed_tex_release_notes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, base_sha, _ = self.create_repository(root)
+            notes = repository / "docs" / "release-notes.tex"
+            notes.parent.mkdir()
+            notes.write_text("\\section{Release}\n", encoding="utf-8")
+            self.git(repository, "add", str(notes.relative_to(repository)))
+            self.git(repository, "commit", "-m", "add release notes")
+
+            output, _ = local_collector.collect(
+                self.args(
+                    repository,
+                    root / "snapshot",
+                    base=base_sha,
+                    head="HEAD",
+                )
+            )
+
+            self.assertTrue((output / "files" / "docs" / "release-notes.tex").is_file())
+            manifest = json.loads(
+                (output / "manifest.json").read_text(encoding="utf-8")
+            )
+            collected = {
+                item["path"]: item for item in manifest["collected_files"]
+            }
+            self.assertTrue(
+                collected["docs/release-notes.tex"]["changed_in_pull_request"]
+            )
+
     def test_layered_sampling_keeps_each_architecture_layer(self):
         candidates = [
             {"path": f"src/generated/Noise{index}.java", "size": 100, "sha": str(index)}
@@ -354,6 +384,26 @@ class LocalCollectionTests(unittest.TestCase):
             self.assertLessEqual(
                 len(context), prepare_analysis_context.CONTEXT_DEFAULTS["quick"]["max_chars"]
             )
+
+    def test_analysis_context_discloses_layers_with_no_candidates(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, _, _ = self.create_repository(root)
+            snapshot, _ = local_collector.collect(
+                self.args(repository, root / "snapshot")
+            )
+            output = snapshot / "analysis-context-quick.md"
+
+            result = prepare_analysis_context.build_context(
+                snapshot, "quick", output, deadline_seconds=20
+            )
+
+            self.assertIn("route", result["unavailable_layers"])
+            self.assertIn("service", result["unavailable_layers"])
+            self.assertIn("persistence", result["unavailable_layers"])
+            self.assertIn("operations", result["unavailable_layers"])
+            context = output.read_text(encoding="utf-8")
+            self.assertIn("No candidates were available for layers", context)
 
     def test_reasoning_anchors_prefer_source_over_configuration_files(self):
         anchors = prepare_analysis_context.reasoning_anchors(
@@ -633,6 +683,30 @@ class ReportFinalizationTests(unittest.TestCase):
             self.assertIn("Report validation: passed", report)
             self.assertRegex(report, r"Total elapsed: 2\.\d seconds")
             self.assertNotIn(finalize_report.VALIDATION_PLACEHOLDER, report)
+
+    def test_finalizer_marks_deadline_exceeded_report_as_limited(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            snapshot, draft = self.create_snapshot_and_report(root)
+            output = root / "final.md"
+
+            result = finalize_report.finalize(
+                draft,
+                snapshot,
+                "quick",
+                time.time() - 121,
+                output,
+            )
+            report = output.read_text(encoding="utf-8")
+
+            self.assertEqual(result["validation"], "passed-with-deadline-limit")
+            self.assertTrue(result["deadline_exceeded"])
+            self.assertIn(
+                "Report validation: passed-with-deadline-limit", report
+            )
+            self.assertTrue(
+                any("deadline" in warning.lower() for warning in result["warnings"])
+            )
 
     def test_quick_profile_rejects_long_report(self):
         report = "Profile: Quick\n" + (

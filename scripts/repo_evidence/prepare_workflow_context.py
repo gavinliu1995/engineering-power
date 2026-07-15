@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 
 
-WORKFLOW_CONTEXT_VERSION = 1
+WORKFLOW_CONTEXT_VERSION = 2
 
 WORKFLOW_PROFILES = {
     "dependency-impact": {
@@ -54,8 +54,38 @@ WORKFLOW_PROFILES = {
 }
 
 PROFILE_LIMITS = {
-    "quick": {"max_files": 12, "max_chars": 80_000, "max_lines": 120},
-    "deep": {"max_files": 24, "max_chars": 220_000, "max_lines": 240},
+    "quick": {
+        "max_files": 12,
+        "max_changed_files": 60,
+        "max_chars": 80_000,
+        "max_lines": 120,
+    },
+    "deep": {
+        "max_files": 24,
+        "max_changed_files": 200,
+        "max_chars": 220_000,
+        "max_lines": 240,
+    },
+}
+
+GENERIC_SYMBOL_TOKENS = {
+    "application",
+    "client",
+    "config",
+    "controller",
+    "dao",
+    "dto",
+    "entity",
+    "handler",
+    "impl",
+    "model",
+    "page",
+    "repository",
+    "request",
+    "response",
+    "route",
+    "service",
+    "test",
 }
 
 SENSITIVE_PATH = re.compile(
@@ -82,16 +112,78 @@ def write_json(path, value):
     )
 
 
+def symbol_parts(path):
+    stem = Path(path).stem
+    expanded = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", stem)
+    return {
+        token.lower()
+        for token in re.split(r"[^A-Za-z0-9]+", expanded)
+        if len(token) >= 4 and token.lower() not in GENERIC_SYMBOL_TOKENS
+    }
+
+
+def normalized_stem(path):
+    return re.sub(r"[^a-z0-9]", "", Path(path).stem.lower())
+
+
 def rank_evidence(entries, workflow):
     terms = WORKFLOW_PROFILES[workflow]["terms"]
+    changed_entries = [
+        entry for entry in entries if entry.get("changed_in_pull_request")
+    ]
+    changed_stems = {
+        normalized_stem(entry.get("path", "")) for entry in changed_entries
+    }
+    changed_stems.discard("")
+    changed_tokens = (
+        set().union(
+            *(symbol_parts(entry.get("path", "")) for entry in changed_entries)
+        )
+        if changed_entries
+        else set()
+    )
 
-    def score(entry):
+    def support_score(entry):
         path = entry.get("path", "").lower()
         term_hits = sum(term in path for term in terms)
-        changed = bool(entry.get("changed_in_pull_request"))
-        return (-int(changed), -term_hits, path)
+        normalized_path = re.sub(r"[^a-z0-9]", "", path)
+        stem_affinity = sum(stem in normalized_path for stem in changed_stems)
+        token_affinity = sum(token in path for token in changed_tokens)
+        affinity = (stem_affinity * 10) + token_affinity
+        is_relevant = bool(term_hits or affinity)
+        return is_relevant, affinity, term_hits, path
 
-    return sorted(entries, key=score)
+    changed_ranked = sorted(
+        changed_entries, key=lambda entry: entry.get("path", "").lower()
+    )
+    supporting = []
+    for entry in entries:
+        if entry.get("changed_in_pull_request"):
+            continue
+        relevant, affinity, term_hits, path = support_score(entry)
+        if relevant:
+            supporting.append((entry, affinity, term_hits, path))
+    supporting.sort(key=lambda item: (-item[1], -item[2], item[3]))
+    return changed_ranked, [item[0] for item in supporting]
+
+
+def declared_changed_paths(snapshot, manifest):
+    changed_path = snapshot / "pull-request-files.json"
+    if changed_path.is_file():
+        return sorted(
+            {
+                item.get("filename")
+                for item in read_json(changed_path)
+                if item.get("filename")
+            }
+        )
+    return sorted(
+        {
+            item.get("path")
+            for item in manifest.get("collected_files", [])
+            if item.get("changed_in_pull_request") and item.get("path")
+        }
+    )
 
 
 def citation_windows(lines, terms, max_lines):
@@ -179,16 +271,34 @@ def build_workflow_context(snapshot, workflow, profile, output):
     manifest = read_json(manifest_path)
     limits = PROFILE_LIMITS[profile]
     terms = WORKFLOW_PROFILES[workflow]["terms"]
-    ranked = rank_evidence(manifest.get("collected_files", []), workflow)
+    declared_changed = declared_changed_paths(snapshot, manifest)
+    declared_changed_set = set(declared_changed)
+    entries = []
+    for original in manifest.get("collected_files", []):
+        entry = dict(original)
+        # Validate every manifest path before relevance filtering so an
+        # irrelevant-looking traversal entry cannot bypass the safety check.
+        resolve_evidence_file(files_root, entry.get("path", ""))
+        if entry.get("path") in declared_changed_set:
+            entry["changed_in_pull_request"] = True
+        entries.append(entry)
+    changed_ranked, supporting_ranked = rank_evidence(entries, workflow)
+    available_paths = {entry.get("path") for entry in entries}
+    available_changed = sorted(declared_changed_set & available_paths)
+    missing_changed = sorted(declared_changed_set - available_paths)
+    changed_candidates = changed_ranked[: limits["max_changed_files"]]
+    supporting_candidates = supporting_ranked[: limits["max_files"]]
+    ranked = changed_candidates + supporting_candidates
     selected = []
     skipped_sensitive = []
     blocks = []
     used_chars = 0
-    truncated = len(ranked) > limits["max_files"]
+    truncated = (
+        len(changed_ranked) > limits["max_changed_files"]
+        or len(supporting_ranked) > limits["max_files"]
+    )
 
     for entry in ranked:
-        if len(selected) >= limits["max_files"]:
-            break
         relative_path = entry.get("path", "")
         source = resolve_evidence_file(files_root, relative_path)
         if SENSITIVE_PATH.search(relative_path):
@@ -217,6 +327,25 @@ def build_workflow_context(snapshot, workflow, profile, output):
         limitations.append(
             "Missing evidence layers: " + ", ".join(selection["missing_layers"]) + "."
         )
+    unavailable_layers = selection.get("unavailable_layers", [])
+    if unavailable_layers:
+        limitations.append(
+            "No candidates were available for evidence layers: "
+            + ", ".join(unavailable_layers)
+            + "."
+        )
+    if missing_changed:
+        limitations.append(
+            f"{len(missing_changed)} declared changed file(s) were not present "
+            "in the collected snapshot."
+        )
+    selected_changed = sorted(declared_changed_set & set(selected))
+    unselected_changed = sorted(set(available_changed) - set(selected_changed))
+    if unselected_changed:
+        limitations.append(
+            f"{len(unselected_changed)} collected changed file(s) exceeded the "
+            "workflow context budget."
+        )
     if truncated:
         limitations.append("Workflow context reached its profile budget.")
     if skipped_sensitive:
@@ -238,6 +367,10 @@ def build_workflow_context(snapshot, workflow, profile, output):
         f"- Resolved commit: `{manifest.get('resolved_ref')}`",
         f"- Authentication: `{manifest.get('authentication', {}).get('method')}`",
         f"- Context policy: `{WORKFLOW_CONTEXT_VERSION}`",
+        f"- Declared changed files: `{len(declared_changed)}`",
+        f"- Changed files present in snapshot: `{len(available_changed)}`",
+        f"- Changed files selected: `{len(selected_changed)}`",
+        f"- Relevant supporting candidates: `{len(supporting_ranked)}`",
         "",
         "## Selected Evidence",
         "",
@@ -260,6 +393,12 @@ def build_workflow_context(snapshot, workflow, profile, output):
         "resolved_ref": manifest.get("resolved_ref"),
         "selected_files": selected,
         "selected_file_count": len(selected),
+        "changed_files_total": len(declared_changed),
+        "changed_files_available": len(available_changed),
+        "changed_files_selected": len(selected_changed),
+        "changed_files_missing_from_snapshot": missing_changed,
+        "changed_files_unselected": unselected_changed,
+        "relevant_supporting_candidates": len(supporting_ranked),
         "truncated": truncated,
         "skipped_sensitive_files": skipped_sensitive,
         "limitations": limitations,

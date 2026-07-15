@@ -11,7 +11,7 @@ import time
 from collect_github_context import LAYER_ORDER, progress, select_candidates
 
 
-CONTEXT_POLICY_VERSION = 4
+CONTEXT_POLICY_VERSION = 5
 
 CONTEXT_DEFAULTS = {
     "quick": {
@@ -192,6 +192,24 @@ def build_context(snapshot, profile, output, deadline_seconds):
             + ", ".join(selection["missing_layers"])
             + "."
         )
+    unavailable_layers = selection.get("unavailable_layers")
+    if unavailable_layers is None:
+        candidates = selection.get("layer_candidates", {})
+        unavailable_layers = (
+            [
+                layer
+                for layer in LAYER_ORDER[:-1]
+                if not candidates.get(layer, 0)
+            ]
+            if candidates
+            else []
+        )
+    if unavailable_layers:
+        limitations.append(
+            "No candidates were available for layers: "
+            + ", ".join(unavailable_layers)
+            + "."
+        )
 
     lines = [
         "# RepoLens Analysis Context",
@@ -330,6 +348,7 @@ def build_context(snapshot, profile, output, deadline_seconds):
         "collected_files": manifest.get("stats", {}).get("collected_files", 0),
         "layer_coverage": collected,
         "missing_layers": selection.get("missing_layers", []),
+        "unavailable_layers": unavailable_layers,
         "elapsed_seconds": round(time.monotonic() - started_at, 3),
         "limitations": limitations,
     }

@@ -24,7 +24,7 @@ from urllib import error, parse, request
 API_ROOT = os.environ.get("GITHUB_API_URL", "https://api.github.com").rstrip("/")
 API_VERSION = "2022-11-28"
 DEFAULT_CONFIG_PATH = "~/.config/repolens/config.json"
-SELECTION_POLICY_VERSION = 4
+SELECTION_POLICY_VERSION = 5
 
 PROFILE_DEFAULTS = {
     "quick": {
@@ -107,6 +107,8 @@ TEXT_SUFFIXES = {
     ".sass",
     ".scala",
     ".scss",
+    ".adoc",
+    ".rst",
     ".sh",
     ".sql",
     ".svelte",
@@ -115,6 +117,7 @@ TEXT_SUFFIXES = {
     ".toml",
     ".ts",
     ".tsx",
+    ".tex",
     ".txt",
     ".vue",
     ".xml",
@@ -687,11 +690,27 @@ def select_candidates(candidates, changed_paths, max_files, max_bytes):
         for layer in LAYER_ORDER[:-1]
         if layer_candidates[layer] and not layer_selected[layer]
     ]
+    unavailable_layers = [
+        layer for layer in LAYER_ORDER[:-1] if not layer_candidates[layer]
+    ]
+    changed_candidate_paths = {entry["path"] for entry in changed}
     return selected, {
         "policy_version": SELECTION_POLICY_VERSION,
         "layer_candidates": layer_candidates,
         "layer_selected": layer_selected,
         "missing_layers": missing_layers,
+        "unavailable_layers": unavailable_layers,
+        "changed_files_requested": len(changed_paths),
+        "changed_text_candidates": len(changed),
+        "changed_selected": sum(
+            1 for item in selected if item["path"] in changed_paths
+        ),
+        "changed_files_not_text_candidates": sorted(
+            changed_paths - changed_candidate_paths
+        ),
+        "changed_files_not_selected": sorted(
+            changed_candidate_paths - selected_paths
+        ),
         "truncated_by_file_limit": len(selected) < len(prepared) and len(selected) >= max_files,
         "truncated_by_byte_limit": total_bytes >= max_bytes or any(
             (entry.get("size") or 0) + total_bytes > max_bytes
@@ -1003,6 +1022,18 @@ def collect(args):
         if selection["layer_candidates"].get(layer)
         and not selection["layer_selected"].get(layer)
     ]
+    selection["unavailable_layers"] = [
+        layer
+        for layer in LAYER_ORDER[:-1]
+        if not selection["layer_candidates"].get(layer)
+    ]
+    collected_paths = {item["path"] for item in collected_files}
+    selection["changed_collected"] = sum(
+        1 for path in collected_paths if path in changed_paths
+    )
+    selection["changed_files_missing_from_snapshot"] = sorted(
+        changed_paths - collected_paths
+    )
 
     tree_lines = []
     for entry in sorted(tree, key=lambda item: item.get("path", "")):

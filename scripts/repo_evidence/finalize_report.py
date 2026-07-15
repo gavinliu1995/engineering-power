@@ -110,8 +110,16 @@ def finalize(draft, snapshot, profile, started_at_epoch, output):
     elapsed_text = f"{elapsed_seconds:.1f} seconds"
     if deadline_exceeded:
         elapsed_text += " (deadline exceeded)"
+    validation_status = (
+        "passed-with-deadline-limit" if deadline_exceeded else "passed"
+    )
+    if deadline_exceeded:
+        warnings.append(
+            f"Report exceeded the {deadline_seconds}s {profile} deadline; "
+            "coverage may be incomplete"
+        )
 
-    finalized = report.replace(VALIDATION_PLACEHOLDER, "passed").replace(
+    finalized = report.replace(VALIDATION_PLACEHOLDER, validation_status).replace(
         ELAPSED_PLACEHOLDER, elapsed_text
     )
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -129,7 +137,7 @@ def finalize(draft, snapshot, profile, started_at_epoch, output):
     return {
         "report": str(output.resolve()),
         "profile": profile,
-        "validation": "passed",
+        "validation": validation_status,
         "mode": final_mode,
         "diagrams": len(final_diagrams),
         "citations": final_citations,
