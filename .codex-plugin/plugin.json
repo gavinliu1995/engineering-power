@@ -1,7 +1,7 @@
 {
   "name": "engineering-power",
   "version": "0.1.0",
-  "description": "Evidence-backed engineering workflows for repository understanding, PR analysis, planning, testing, review, and release decisions.",
+  "description": "Evidence-backed engineering workflows for repository understanding, PR analysis, dependency impact, API contracts, release notes, planning, testing, review, and release decisions.",
   "author": {
     "name": "Local developer"
   },
@@ -9,10 +9,10 @@
   "interface": {
     "displayName": "Engineering Power",
     "shortDescription": "Engineering workflows grounded in real code evidence.",
-    "longDescription": "Engineering Power combines structured software-engineering workflows with shared repository, PR, local Git, and offline diff intelligence.",
+    "longDescription": "Engineering Power combines structured software-engineering workflows with shared repository, PR, local Git, and offline diff intelligence for architecture, dependency impact, API contracts, release notes, testing, and release decisions.",
     "developerName": "Local developer",
     "category": "Productivity",
-    "capabilities": ["repository intelligence", "PR impact analysis", "architecture mapping", "developer onboarding", "release readiness"],
-    "defaultPrompt": "Use Engineering Power to understand this repository or plan a safe engineering change."
+    "capabilities": ["repository intelligence", "PR impact analysis", "dependency impact analysis", "API contract generation", "release note generation", "architecture mapping", "developer onboarding", "release readiness"],
+    "defaultPrompt": "Use Engineering Power to understand this repository, analyze a change, or produce a cited engineering delivery report."
   }
 }

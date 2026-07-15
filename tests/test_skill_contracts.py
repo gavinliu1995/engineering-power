@@ -53,6 +53,26 @@ class SkillContractTests(unittest.TestCase):
         ):
             self.assertIn(phrase, text)
 
+    def test_pr_golden_path_routes_to_derived_workflows(self):
+        text = skill_text("pr-impact-analysis")
+        for name in (
+            "dependency-impact-analysis",
+            "api-contract-generator",
+            "release-note-generator",
+        ):
+            self.assertIn(name, text)
+
+        capabilities = " ".join(
+            plugin_manifest()["interface"]["capabilities"]
+        ).lower()
+        for phrase in ("dependency impact", "api contract", "release note"):
+            self.assertIn(phrase, capabilities)
+
+    def test_release_readiness_consumes_only_completed_derived_reports(self):
+        text = skill_text("release-readiness")
+        self.assertIn("completed derived", text.lower())
+        self.assertIn("do not claim", text.lower())
+
 
 if __name__ == "__main__":
     unittest.main()
