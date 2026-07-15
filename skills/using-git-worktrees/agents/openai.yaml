@@ -1,3 +1,4 @@
 interface:
-  display_name: "Using Git Worktrees"
-  short_description: "Create isolated git worktrees for parallel feature work"
+  display_name: "Engineering Power: Using Git Worktrees"
+  short_description: "Create isolated Git worktrees for safe feature work"
+  default_prompt: "Use $using-git-worktrees to prepare an isolated workspace for this feature."

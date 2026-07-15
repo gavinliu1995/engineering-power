@@ -1,3 +1,4 @@
 interface:
-  display_name: "Executing Plans"
-  short_description: "Execute written implementation plans with review checkpoints"
+  display_name: "Engineering Power: Executing Plans"
+  short_description: "Execute written implementation plans with checkpoints"
+  default_prompt: "Use $executing-plans to execute this approved implementation plan with checkpoints."

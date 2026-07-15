@@ -1,4 +1,4 @@
 interface:
-  display_name: "Release Note Generator"
-  short_description: "Generate technical and user-facing notes from evidence."
+  display_name: "Engineering Power: Release Note Generator"
+  short_description: "Generate cited technical and user-facing release notes"
   default_prompt: "Use $release-note-generator to generate evidence-backed release notes for this change."

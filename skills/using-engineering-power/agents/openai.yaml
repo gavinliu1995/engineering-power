@@ -1,3 +1,4 @@
 interface:
-  display_name: "Using Superpowers"
-  short_description: "Establish how and when to use Superpowers skills"
+  display_name: "Engineering Power: Using Engineering Power"
+  short_description: "Route engineering work through the correct skills"
+  default_prompt: "Use $using-engineering-power to select the correct workflow for this engineering task."

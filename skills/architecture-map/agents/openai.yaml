@@ -1,0 +1,4 @@
+interface:
+  display_name: "Engineering Power: Architecture Map"
+  short_description: "Map modules, boundaries, data ownership, and flows"
+  default_prompt: "Use $architecture-map to produce a cited architecture map for this repository."

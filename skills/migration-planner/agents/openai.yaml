@@ -1,0 +1,4 @@
+interface:
+  display_name: "Engineering Power: Migration Planner"
+  short_description: "Plan evidence-backed migrations in safe delivery waves"
+  default_prompt: "Use $migration-planner to build a phased migration plan toward the requested target."

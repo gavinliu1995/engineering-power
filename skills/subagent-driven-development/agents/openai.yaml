@@ -1,3 +1,4 @@
 interface:
-  display_name: "Subagent-Driven Development"
-  short_description: "Execute implementation plans with staged subagent reviews"
+  display_name: "Engineering Power: Subagent-Driven Development"
+  short_description: "Execute plans with isolated implementation and review tasks"
+  default_prompt: "Use $subagent-driven-development to execute this plan with isolated task reviews."

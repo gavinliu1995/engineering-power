@@ -1,0 +1,4 @@
+interface:
+  display_name: "Engineering Power: PR Impact Analysis"
+  short_description: "Analyze change propagation, tests, and regression risk"
+  default_prompt: "Use $pr-impact-analysis to review this change for propagation, tests, and regression risk."

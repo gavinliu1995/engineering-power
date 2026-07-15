@@ -1,3 +1,4 @@
 interface:
-  display_name: "Finishing a Development Branch"
-  short_description: "Wrap up implementation work and choose the right integration path"
+  display_name: "Engineering Power: Finishing Development Work"
+  short_description: "Verify and finish a development branch safely"
+  default_prompt: "Use $finishing-development-work to verify and safely integrate this completed branch."

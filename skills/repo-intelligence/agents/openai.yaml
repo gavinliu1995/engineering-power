@@ -1,0 +1,4 @@
+interface:
+  display_name: "Engineering Power: Repo Intelligence"
+  short_description: "Explain architecture, flows, risks, and onboarding"
+  default_prompt: "Use $repo-intelligence to produce a cited intelligence report for this repository."

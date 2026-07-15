@@ -1,0 +1,4 @@
+interface:
+  display_name: "Engineering Power: Codebase Onboarding"
+  short_description: "Create a practical evidence-backed onboarding guide"
+  default_prompt: "Use $codebase-onboarding to create a practical onboarding guide for this repository."

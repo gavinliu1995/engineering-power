@@ -1,0 +1,4 @@
+interface:
+  display_name: "Engineering Power: Release Readiness"
+  short_description: "Decide release readiness from code and test evidence"
+  default_prompt: "Use $release-readiness to assess whether this change is ready to release."

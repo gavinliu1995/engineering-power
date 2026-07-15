@@ -1,3 +1,4 @@
 interface:
-  display_name: "Requesting Code Review"
-  short_description: "Request focused code review before merging"
+  display_name: "Engineering Power: Requesting Code Review"
+  short_description: "Review completed changes against requirements and risks"
+  default_prompt: "Use $requesting-code-review to review this completed implementation before integration."
