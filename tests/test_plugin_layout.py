@@ -19,6 +19,7 @@ USER_WORKFLOWS = {
     "release-readiness",
     "migration-planner",
     "dependency-impact-analysis",
+    "api-contract-generator",
 }
 SUPPORT_WORKFLOWS = {
     "using-engineering-power",

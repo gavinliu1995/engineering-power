@@ -1,0 +1,4 @@
+interface:
+  display_name: "API Contract Generator"
+  short_description: "Generate cited API surfaces and compatibility deltas."
+  default_prompt: "Use $api-contract-generator to generate an evidence-backed API contract for this target."

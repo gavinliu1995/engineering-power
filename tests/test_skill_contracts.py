@@ -30,6 +30,17 @@ class SkillContractTests(unittest.TestCase):
         ):
             self.assertIn(phrase, text)
 
+    def test_api_contract_skill_contract(self):
+        text = skill_text("api-contract-generator")
+        for phrase in (
+            "prepare_workflow_context.py",
+            "api-contract",
+            "compatibility",
+            "authentication",
+            "Do not invent",
+        ):
+            self.assertIn(phrase, text)
+
 
 if __name__ == "__main__":
     unittest.main()
