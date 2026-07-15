@@ -18,6 +18,7 @@ USER_WORKFLOWS = {
     "codebase-onboarding",
     "release-readiness",
     "migration-planner",
+    "dependency-impact-analysis",
 }
 SUPPORT_WORKFLOWS = {
     "using-engineering-power",

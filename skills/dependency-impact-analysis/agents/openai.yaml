@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dependency Impact Analysis"
+  short_description: "Trace dependency impact from repository evidence."
+  default_prompt: "Use $dependency-impact-analysis to trace dependency impact for this repository or change."
