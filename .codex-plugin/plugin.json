@@ -1,16 +1,16 @@
 {
   "name": "engineering-power",
-  "version": "0.1.0+codex.20260715080748",
+  "version": "0.1.0+codex.20260715090714",
   "description": "Evidence-backed engineering workflows for repository understanding, PR analysis, dependency impact, API contracts, release notes, planning, testing, review, and release decisions.",
   "author": {
-    "name": "Local developer"
+    "name": "Gavin Liu"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Engineering Power",
     "shortDescription": "Engineering workflows grounded in real code evidence.",
     "longDescription": "Engineering Power combines structured software-engineering workflows with shared repository, PR, local Git, and offline diff intelligence for architecture, dependency impact, API contracts, release notes, testing, and release decisions.",
-    "developerName": "Local developer",
+    "developerName": "Gavin Liu",
     "category": "Productivity",
     "capabilities": [
       "repository intelligence",
