@@ -6,6 +6,10 @@ export function ReleaseDecision() {
       <p className="eyebrow">Recommendation</p>
       <h2 id="release-decision-title">Release decision</h2>
       <p className="decision-value">{reportData.recommendation}</p>
+      <div className="confidence-statement">
+        <h3>Confidence</h3>
+        <p>{reportData.confidence}</p>
+      </div>
       <div className="report-columns">
         <div>
           <h3>Risks</h3>

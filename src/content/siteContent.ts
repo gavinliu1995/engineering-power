@@ -20,10 +20,48 @@ export type ValidationRow = {
   detail: string;
 };
 
+export type ReportMetadata = {
+  target: string;
+  base: string;
+  head: string;
+  profile: string;
+  evidenceSnapshot: string;
+};
+
+export type DemoReport = {
+  metadata: ReportMetadata;
+  pullRequest: string;
+  summary: string;
+  recommendation: string;
+  confidence: string;
+  affectedComponents: readonly string[];
+  facts: readonly EvidenceItem[];
+  inferences: readonly EvidenceItem[];
+  unknowns: readonly EvidenceItem[];
+  apiCompatibility: string;
+  validations: readonly ValidationRow[];
+  risks: readonly string[];
+  releaseConditions: readonly string[];
+};
+
 export const reportData = {
+  metadata: {
+    target: "Pull request #482 · checkout-tax-rounding",
+    base: "main @ 8f31c2a",
+    head: "feature/checkout-tax-rounding @ c7e194d",
+    profile: "Release readiness review",
+    evidenceSnapshot: "8f31c2a..c7e194d",
+  },
   pullRequest: "checkout-tax-rounding",
   summary: "Normalize tax rounding at the checkout boundary before totals are persisted.",
   recommendation: "Proceed with conditions",
+  confidence:
+    "Moderate — core checkout behavior is evidenced; provider reconciliation remains unverified.",
+  affectedComponents: [
+    "Tax calculation",
+    "Checkout API response",
+    "Payment provider reconciliation",
+  ],
   facts: [
     {
       statement: "TaxCalculator rounds each tax line before adding it to the order total.",
@@ -81,7 +119,7 @@ export const reportData = {
     "Run a staged checkout comparison for high-precision tax scenarios.",
     "Document the rollback owner and decision threshold before release.",
   ],
-} as const;
+} as const satisfies DemoReport;
 
 export const evidenceFlow = [
   "Pull request or local comparison",
@@ -157,7 +195,7 @@ export const siteCopy = {
     title: "See the evidence in report form.",
     description:
       "Explore a static example of a concise, cited engineering narrative.",
-    cta: "Open Static Demo Report",
+    cta: "View Demo Report",
   },
   trust: {
     eyebrow: "Trust boundary",
@@ -165,6 +203,6 @@ export const siteCopy = {
   },
   footer: {
     githubLabel: "View Engineering Power on GitHub",
-    githubUrl: "https://github.com",
+    githubUrl: "https://github.com/gavinliu1995/engineering-power",
   },
 } as const;

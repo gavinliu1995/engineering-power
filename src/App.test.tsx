@@ -90,6 +90,97 @@ test("renders distinct evidence and validation states on the demo report", () =>
   expect(screen.getByText(/illustrative demo citations/i)).toBeInTheDocument();
 });
 
+test("renders the demo report evidence snapshot metadata", () => {
+  render(
+    <MemoryRouter initialEntries={["/demo-report"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  expect(screen.getByText("Target")).toBeInTheDocument();
+  expect(
+    screen.getByText("Pull request #482 · checkout-tax-rounding"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Base")).toBeInTheDocument();
+  expect(screen.getByText("main @ 8f31c2a")).toBeInTheDocument();
+  expect(screen.getByText("Head")).toBeInTheDocument();
+  expect(
+    screen.getByText("feature/checkout-tax-rounding @ c7e194d"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Profile")).toBeInTheDocument();
+  expect(screen.getByText("Release readiness review")).toBeInTheDocument();
+  expect(screen.getByText("Evidence snapshot")).toBeInTheDocument();
+  expect(screen.getByText("8f31c2a..c7e194d")).toBeInTheDocument();
+});
+
+test("renders confidence and affected components on the demo report", () => {
+  render(
+    <MemoryRouter initialEntries={["/demo-report"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  expect(screen.getByRole("heading", { name: "Confidence" })).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "Moderate — core checkout behavior is evidenced; provider reconciliation remains unverified.",
+    ),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "Affected components" }),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Tax calculation")).toBeInTheDocument();
+  expect(screen.getByText("Checkout API response")).toBeInTheDocument();
+  expect(screen.getByText("Payment provider reconciliation")).toBeInTheDocument();
+});
+
+test("uses semantic table headers for the validation matrix", () => {
+  render(
+    <MemoryRouter initialEntries={["/demo-report"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  const table = screen.getByRole("table", { name: "Validation matrix" });
+  expect(table.tagName).toBe("TABLE");
+
+  const headers = within(table).getAllByRole("columnheader");
+  expect(headers).toHaveLength(3);
+  expect(headers.map((header) => header.textContent)).toEqual([
+    "State",
+    "Check",
+    "Evidence",
+  ]);
+  headers.forEach((header) => expect(header).toHaveAttribute("scope", "col"));
+});
+
+test("uses the canonical GitHub repository URL", () => {
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  expect(
+    screen.getByRole("link", { name: "View Engineering Power on GitHub" }),
+  ).toHaveAttribute(
+    "href",
+    "https://github.com/gavinliu1995/engineering-power",
+  );
+});
+
+test("uses the same label for both demo report calls to action", () => {
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  const links = screen.getAllByRole("link", { name: "View Demo Report" });
+  expect(links).toHaveLength(2);
+  links.forEach((link) => expect(link).toHaveAttribute("href", "/demo-report"));
+});
+
 test("renders the not-found page for an unmatched route", () => {
   render(
     <MemoryRouter initialEntries={["/missing"]}>
