@@ -36,6 +36,11 @@ export const outputs: Output[] = [
 
 export const trustBoundaries: TrustBoundary[] = [
   {
+    title: "Static demo, clear boundary",
+    description:
+      "This static demo uses illustrative evidence and citations. It is not live repository analysis.",
+  },
+  {
     title: "Evidence stays specific",
     description:
       "Every conclusion is grounded in the exact repository snapshot being analyzed.",
@@ -59,7 +64,7 @@ export const siteCopy = {
     title: "Evidence-backed engineering decisions.",
     description:
       "Engineering Power turns a pull request or local comparison into cited, decision-ready engineering outputs.",
-    cta: "Open Demo Report",
+    cta: "View Demo Report",
   },
   whyItMatters: {
     title: "A diff shows what changed. Decisions need what it means.",
@@ -78,7 +83,7 @@ export const siteCopy = {
     title: "See the evidence in report form.",
     description:
       "Explore a static example of a concise, cited engineering narrative.",
-    cta: "View Demo Report",
+    cta: "Open Static Demo Report",
   },
   trust: {
     eyebrow: "Trust boundary",
