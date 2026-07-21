@@ -14,4 +14,32 @@ test("renders the product headline on the home route", () => {
       name: /evidence-backed engineering decisions/i,
     }),
   ).toBeInTheDocument();
+
+  expect(
+    screen.getByRole("link", { name: "View Demo Report" }),
+  ).toHaveAttribute("href", "/demo-report");
+});
+
+test("renders the demo report route", () => {
+  render(
+    <MemoryRouter initialEntries={["/demo-report"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  expect(
+    screen.getByRole("heading", { name: /demo report/i }),
+  ).toBeInTheDocument();
+});
+
+test("renders the not-found page for an unmatched route", () => {
+  render(
+    <MemoryRouter initialEntries={["/missing"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  expect(
+    screen.getByRole("heading", { name: /page not found/i }),
+  ).toBeInTheDocument();
 });

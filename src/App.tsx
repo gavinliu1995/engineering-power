@@ -1,9 +1,10 @@
-import { Route, Routes } from "react-router-dom";
+import { Link, Route, Routes } from "react-router-dom";
 
 function HomePage() {
   return (
     <main>
       <h1>Evidence-backed engineering decisions</h1>
+      <Link to="/demo-report">View Demo Report</Link>
     </main>
   );
 }
