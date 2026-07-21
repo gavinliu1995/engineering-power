@@ -58,6 +58,31 @@ test("labels demo evidence and citations as illustrative rather than live analys
   expect(screen.getByText(/not live repository analysis/i)).toBeInTheDocument();
 });
 
+test("makes the homepage evidence states, report excerpt, and trust limits explicit", () => {
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  const whyItMatters = screen.getByRole("region", {
+    name: /a diff shows what changed/i,
+  });
+  expect(within(whyItMatters).getByRole("heading", { name: "Facts" })).toBeInTheDocument();
+  expect(within(whyItMatters).getByRole("heading", { name: "Inferences" })).toBeInTheDocument();
+  expect(within(whyItMatters).getByRole("heading", { name: "Unknowns" })).toBeInTheDocument();
+
+  const demoPreview = screen.getByRole("region", { name: /see the evidence in report form/i });
+  expect(within(demoPreview).getByText(/proceed with conditions/i)).toBeInTheDocument();
+  expect(within(demoPreview).getByText(/taxcalculator rounds each tax line/i)).toBeInTheDocument();
+
+  expect(screen.getByText(/executed checks are run in the captured snapshot/i)).toBeInTheDocument();
+  expect(screen.getByText(/discovered checks are evidence found, not tests run/i)).toBeInTheDocument();
+  expect(screen.getByText(/recommended checks are next steps, not completed validation/i)).toBeInTheDocument();
+  expect(screen.getByText(/deadline or incomplete coverage can limit a report/i)).toBeInTheDocument();
+  expect(screen.getByText(/static demo only — it does not analyze your repository/i)).toBeInTheDocument();
+});
+
 test("renders the demo report route", () => {
   render(
     <MemoryRouter initialEntries={["/demo-report"]}>

@@ -9,7 +9,7 @@ import { EvidenceSection } from "./components/EvidenceSection";
 import { ReleaseDecision } from "./components/ReleaseDecision";
 import { ReportHeader } from "./components/ReportHeader";
 import { ValidationMatrix } from "./components/ValidationMatrix";
-import { reportData, siteCopy } from "./content/siteContent";
+import { homepageEvidenceStates, reportData, siteCopy } from "./content/siteContent";
 
 function HomePage() {
   return (
@@ -21,6 +21,14 @@ function HomePage() {
           <p className="eyebrow">Why it matters</p>
           <h2 id="why-title">{siteCopy.whyItMatters.title}</h2>
           <p>{siteCopy.whyItMatters.description}</p>
+          <div className="evidence-state-grid">
+            {homepageEvidenceStates.map((state) => (
+              <article key={state.label} className={`evidence-state evidence-state-${state.label.toLowerCase()}`}>
+                <h3>{state.label}</h3>
+                <p>{state.description}</p>
+              </article>
+            ))}
+          </div>
         </section>
         <EvidenceFlow />
         <OutputCards />
@@ -29,6 +37,12 @@ function HomePage() {
             <p className="eyebrow">Demo preview</p>
             <h2 id="demo-title">{siteCopy.demo.title}</h2>
             <p>{siteCopy.demo.description}</p>
+            <article className="demo-excerpt" aria-label="Compact report excerpt">
+              <p className="demo-excerpt-label">{siteCopy.demo.excerpt.label}</p>
+              <p className="demo-excerpt-decision">{siteCopy.demo.excerpt.recommendation}</p>
+              <p>{siteCopy.demo.excerpt.fact}</p>
+              <code>{siteCopy.demo.excerpt.citation}</code>
+            </article>
           </div>
           <Link className="button button-secondary" to="/demo-report">
             {siteCopy.demo.cta}

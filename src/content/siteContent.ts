@@ -9,6 +9,11 @@ export type TrustBoundary = {
   description: string;
 };
 
+export type EvidenceState = {
+  label: "Facts" | "Inferences" | "Unknowns";
+  description: string;
+};
+
 export type EvidenceItem = {
   statement: string;
   citation: string;
@@ -146,6 +151,21 @@ export const outputs: Output[] = [
   },
 ];
 
+export const homepageEvidenceStates: readonly EvidenceState[] = [
+  {
+    label: "Facts",
+    description: "Observed code, configuration, and test evidence tied to the exact snapshot.",
+  },
+  {
+    label: "Inferences",
+    description: "Reasoned implications that stay separate from the evidence supporting them.",
+  },
+  {
+    label: "Unknowns",
+    description: "Questions the available evidence cannot establish, kept visible for reviewers.",
+  },
+];
+
 export const trustBoundaries: TrustBoundary[] = [
   {
     title: "Static demo, clear boundary",
@@ -161,6 +181,16 @@ export const trustBoundaries: TrustBoundary[] = [
     title: "Reasoning stays traceable",
     description:
       "Citations keep reviewers connected to the code, tests, and configuration behind each recommendation.",
+  },
+  {
+    title: "Validation states stay distinct",
+    description:
+      "Executed checks are run in the captured snapshot. Discovered checks are evidence found, not tests run. Recommended checks are next steps, not completed validation.",
+  },
+  {
+    title: "Coverage has limits",
+    description:
+      "A deadline or incomplete coverage can limit a report; those limits remain explicit instead of becoming certainty.",
   },
   {
     title: "Decisions stay yours",
@@ -195,6 +225,12 @@ export const siteCopy = {
     title: "See the evidence in report form.",
     description:
       "Explore a static example of a concise, cited engineering narrative.",
+    excerpt: {
+      label: "Report excerpt · checkout-tax-rounding",
+      recommendation: "Proceed with conditions",
+      fact: "TaxCalculator rounds each tax line before adding it to the order total.",
+      citation: "src/checkout/TaxCalculator.ts:L42-L61",
+    },
     cta: "View Demo Report",
   },
   trust: {
@@ -204,5 +240,6 @@ export const siteCopy = {
   footer: {
     githubLabel: "View Engineering Power on GitHub",
     githubUrl: "https://github.com/gavinliu1995/engineering-power",
+    demoNote: "Static demo only — it does not analyze your repository.",
   },
 } as const;
