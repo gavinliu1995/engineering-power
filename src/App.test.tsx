@@ -101,3 +101,15 @@ test("renders the not-found page for an unmatched route", () => {
     screen.getByRole("heading", { name: /page not found/i }),
   ).toBeInTheDocument();
 });
+
+test("offers a route back home when a page is not found", () => {
+  render(
+    <MemoryRouter initialEntries={["/missing"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  expect(
+    screen.getByRole("link", { name: /back to home/i }),
+  ).toHaveAttribute("href", "/");
+});

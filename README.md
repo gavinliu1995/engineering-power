@@ -177,3 +177,23 @@ See
 for the detailed capability and validation gates, and
 [`references/demo-golden-path.md`](references/demo-golden-path.md) for the Demo
 MVP execution contract.
+
+## Static demo deployment
+
+The static Engineering Power demo is a Vite single-page application. From this
+repository, install dependencies and start local development with:
+
+```bash
+npm install
+npm run dev
+```
+
+Create the production bundle with:
+
+```bash
+npm run build
+```
+
+To deploy on Vercel, import this repository in the Vercel dashboard and accept
+the detected Vite build settings. The included `vercel.json` rewrites direct
+visits to application routes, including `/demo-report`, to the SPA entry point.
