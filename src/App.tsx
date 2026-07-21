@@ -5,7 +5,11 @@ import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { OutputCards } from "./components/OutputCards";
 import { TrustBoundary } from "./components/TrustBoundary";
-import { siteCopy } from "./content/siteContent";
+import { EvidenceSection } from "./components/EvidenceSection";
+import { ReleaseDecision } from "./components/ReleaseDecision";
+import { ReportHeader } from "./components/ReportHeader";
+import { ValidationMatrix } from "./components/ValidationMatrix";
+import { reportData, siteCopy } from "./content/siteContent";
 
 function HomePage() {
   return (
@@ -39,8 +43,18 @@ function HomePage() {
 
 function DemoReportPage() {
   return (
-    <main>
-      <h1>Demo report</h1>
+    <main className="report-page">
+      <ReportHeader />
+      <ReleaseDecision />
+      <section className="api-summary" aria-labelledby="api-summary-title">
+        <p className="eyebrow">API contract delta</p>
+        <h2 id="api-summary-title">Compatibility summary</h2>
+        <p>{reportData.apiCompatibility}</p>
+      </section>
+      <EvidenceSection label="Facts" tone="fact" items={reportData.facts} />
+      <EvidenceSection label="Inferences" tone="inference" items={reportData.inferences} />
+      <EvidenceSection label="Unknowns" tone="unknown" items={reportData.unknowns} />
+      <ValidationMatrix />
     </main>
   );
 }

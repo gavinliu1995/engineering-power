@@ -9,6 +9,80 @@ export type TrustBoundary = {
   description: string;
 };
 
+export type EvidenceItem = {
+  statement: string;
+  citation: string;
+};
+
+export type ValidationRow = {
+  state: "Executed" | "Discovered" | "Recommended";
+  check: string;
+  detail: string;
+};
+
+export const reportData = {
+  pullRequest: "checkout-tax-rounding",
+  summary: "Normalize tax rounding at the checkout boundary before totals are persisted.",
+  recommendation: "Proceed with conditions",
+  facts: [
+    {
+      statement: "TaxCalculator rounds each tax line before adding it to the order total.",
+      citation: "src/checkout/TaxCalculator.ts:L42-L61",
+    },
+    {
+      statement: "The checkout response exposes totals as integer cents.",
+      citation: "src/api/CheckoutResponse.ts:L18-L31",
+    },
+  ],
+  inferences: [
+    {
+      statement: "Moving rounding to the boundary should make line-item and order-total calculations consistent.",
+      citation: "src/checkout/TaxCalculator.ts:L42-L61",
+    },
+    {
+      statement: "Existing consumers should remain compatible because the response shape is unchanged.",
+      citation: "src/api/CheckoutResponse.ts:L18-L31",
+    },
+  ],
+  unknowns: [
+    {
+      statement: "Whether every payment provider reconciles fractional tax adjustments in the same way.",
+      citation: "docs/payments/provider-reconciliation.md:L1-L24",
+    },
+    {
+      statement: "Whether historical carts require a data correction after release.",
+      citation: "src/checkout/OrderRepository.ts:L88-L104",
+    },
+  ],
+  apiCompatibility: "Compatible: no endpoint, field, or type changes are illustrated in this example.",
+  validations: [
+    {
+      state: "Executed",
+      check: "Unit suite",
+      detail: "TaxCalculator rounding scenarios passed in this illustrative snapshot.",
+    },
+    {
+      state: "Discovered",
+      check: "Provider reconciliation",
+      detail: "No evidence is included for provider-specific fractional-cent handling.",
+    },
+    {
+      state: "Recommended",
+      check: "Staged checkout",
+      detail: "Compare tax totals for high-precision carts before broad rollout.",
+    },
+  ],
+  risks: [
+    "A provider may reject or adjust a fractional-cent reconciliation differently from checkout.",
+    "Historical carts may display a different tax total if recalculated after release.",
+  ],
+  releaseConditions: [
+    "Confirm reconciliation behavior with each supported payment provider.",
+    "Run a staged checkout comparison for high-precision tax scenarios.",
+    "Document the rollback owner and decision threshold before release.",
+  ],
+} as const;
+
 export const evidenceFlow = [
   "Pull request or local comparison",
   "One exact evidence snapshot",

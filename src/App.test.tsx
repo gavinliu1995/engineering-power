@@ -70,6 +70,26 @@ test("renders the demo report route", () => {
   ).toBeInTheDocument();
 });
 
+test("renders distinct evidence and validation states on the demo report", () => {
+  render(
+    <MemoryRouter initialEntries={["/demo-report"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  expect(
+    screen.getByRole("heading", { name: /release decision/i }),
+  ).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Facts" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "Inferences" }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "Unknowns" }),
+  ).toBeInTheDocument();
+  expect(screen.getByText(/illustrative demo citations/i)).toBeInTheDocument();
+});
+
 test("renders the not-found page for an unmatched route", () => {
   render(
     <MemoryRouter initialEntries={["/missing"]}>

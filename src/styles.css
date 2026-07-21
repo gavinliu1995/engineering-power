@@ -67,10 +67,37 @@ p { color: #adc1d8; line-height: 1.65; }
 .site-footer p { margin: 0; color: inherit; }
 .site-footer a { color: #50e3c2; }
 
+.report-page { padding-top: 3.5rem; max-width: 66rem; }
+.report-header { max-width: 48rem; margin-bottom: 3.5rem; }
+.report-header h1 { font-size: clamp(2.8rem, 6vw, 4.8rem); }
+.report-summary { font-size: 1.15rem; }
+.illustrative-note { margin-top: 1.5rem; color: #50e3c2; font-size: .9rem; }
+.release-decision, .api-summary, .evidence-section, .validation-section { padding: 2rem; margin-bottom: 1rem; border: 1px solid #294159; border-radius: .75rem; background: #0c1a2b; }
+.release-decision { border-color: #50e3c2; background: #103245; }
+.release-decision h2, .api-summary h2, .evidence-section h2, .validation-section h2 { font-size: clamp(1.7rem, 3vw, 2.35rem); }
+.decision-value { margin-bottom: 2rem; color: #50e3c2; font-size: 1.4rem; font-weight: 750; }
+.report-columns { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+.report-columns ul, .evidence-list { margin: 0; padding-left: 1.2rem; color: #adc1d8; }
+.report-columns li { margin-bottom: .65rem; line-height: 1.55; }
+.evidence-list { display: grid; gap: 1rem; list-style: none; padding-left: 0; }
+.evidence-list li { padding-left: 1rem; border-left: 3px solid #50e3c2; }
+.evidence-list p { margin-bottom: .6rem; }
+.evidence-list code { color: #b6c9db; font-size: .8rem; overflow-wrap: anywhere; }
+.evidence-inference .evidence-list li { border-color: #8db7ff; }
+.evidence-unknown .evidence-list li { border-color: #f5c56b; }
+.validation-table { display: grid; gap: .75rem; }
+.validation-row { display: grid; grid-template-columns: 8rem 11rem 1fr; gap: 1rem; align-items: start; padding: 1rem; border-radius: .45rem; background: #102238; color: #adc1d8; line-height: 1.5; }
+.validation-state { color: #50e3c2; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; }
+.state-discovered { color: #f5c56b; }
+.state-recommended { color: #8db7ff; }
+
 @media (max-width: 720px) {
   .site-header, main, .site-footer { width: min(100% - 2rem, 72rem); }
   .hero { padding: 4rem 0 5rem; }
   .evidence-flow, .output-grid, .trust-list { grid-template-columns: 1fr; }
   .evidence-flow li { min-height: auto; }
   .demo-section { align-items: flex-start; flex-direction: column; padding: 1.75rem; }
+  .report-page { padding-top: 2rem; }
+  .release-decision, .api-summary, .evidence-section, .validation-section { padding: 1.4rem; }
+  .report-columns, .validation-row { grid-template-columns: 1fr; gap: .65rem; }
 }
