@@ -1,0 +1,74 @@
+---
+name: engineering-power
+description: Run evidence-backed repository intelligence, PR impact, architecture, API contract, release, onboarding, migration, debugging, planning, review, and verification workflows. Use for GitHub repositories, local Git repositories, commit comparisons, working trees, and downloaded patches.
+---
+
+# Engineering Power
+
+Use this Skill to make engineering conclusions traceable to a specific Git
+state and source evidence. Default to read-only analysis. Do not checkout,
+reset, apply a patch, commit, or modify the target repository unless the user
+explicitly requests an implementation workflow and authorizes writes.
+
+## Locate the evidence engine
+
+Set `SKILL_DIR` to this Skill directory. Use the first existing directory:
+
+1. `$SKILL_DIR/scripts/repo_evidence` for a package installed by the
+   Engineering Power installer.
+2. `<engineering-power-repository>/scripts/repo_evidence` when this Skill is
+   being used from the Engineering Power repository.
+
+Before any report, use the appropriate collector and preserve its exact
+repository state, cache status, coverage limits, and authentication method.
+
+## Route the request
+
+| User intent | Workflow |
+| --- | --- |
+| Understand a repository, its architecture, business flow, risks, or setup | Repository Intelligence |
+| Review a PR, branch comparison, working tree, or patch | PR Impact Analysis |
+| Map modules, trust boundaries, integrations, or data ownership | Architecture Map |
+| Trace direct, reverse, build, runtime, or test effects | Dependency Impact Analysis |
+| Inventory API contracts or assess compatibility changes | API Contract Generator |
+| Produce technical or user-facing release notes | Release Note Generator |
+| Decide Go / Go with conditions / No-go | Release Readiness |
+| Prepare a new developer to work in the repository | Codebase Onboarding |
+| Plan a framework, runtime, SDK, database, or platform move | Migration Planner |
+| Investigate a test failure or unexpected behavior | Systematic Debugging |
+| Design a feature before implementation | Brainstorming, then Writing Plans |
+| Verify a completed implementation before claiming success | Verification Before Completion |
+
+## Evidence workflow
+
+1. For a local repository, use `collect_local_context.py`; for a GitHub URL or
+   PR, use `collect_github_context.py`. Prefer local collection for a repository
+   cloned from Bitbucket or only reachable over a corporate VPN.
+2. Use `quick` unless the user explicitly requests `deep`.
+3. For change analysis, collect one pull-request evidence snapshot, then reuse
+   it for Dependency Impact Analysis, API Contract Generator, Release Note
+   Generator, and Release Readiness. Do not recollect the same target per
+   derived report.
+4. Use `prepare_analysis_context.py` or `prepare_workflow_context.py` to create
+   citation-ready context.
+5. Distinguish facts, inferences, and unknowns. Distinguish executed tests from
+   discovered and recommended tests.
+6. Validate an inline Markdown report with `finalize_report.py` before delivery.
+   If coverage is limited by a deadline or missing evidence, state that clearly.
+
+## Platform rules
+
+- **GitHub Copilot CLI / IDE:** After install, use `/skills reload`, then
+  `/skills info engineering-power`. Invoke it explicitly with
+  `/engineering-power` when required.
+- **Claude Code and Cursor:** Use the installed `engineering-power` Skill from
+  the project or user skill directory; give it a local repository path, GitHub
+  URL, branch comparison, working tree, or patch.
+- **GitHub cloud agents:** Use for GitHub repositories and PRs only. They cannot
+  access a developer's local checkout or a company VPN/Bitbucket environment.
+
+## Report contract
+
+Include the target, exact commit or base/head state, profile, cache status,
+collection coverage, citations, and the validation result. Never claim that a
+test passed unless this session ran it and observed a successful result.

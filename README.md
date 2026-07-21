@@ -1,6 +1,7 @@
 # Engineering Power
 
-Evidence-backed AI engineering workflows for Codex.
+Evidence-backed AI engineering workflows for GitHub Copilot, Claude Code,
+Cursor, and Codex.
 
 Engineering Power helps engineers understand repositories and review changes
 without treating model intuition as source truth. It accepts GitHub repositories,
@@ -12,7 +13,7 @@ test status, collection coverage, and explicit unknowns.
 
 General-purpose AI can summarize code, but engineering decisions need stronger
 evidence. Engineering Power combines a deterministic repository evidence engine
-with focused Codex workflows so that material conclusions can be traced back to
+with focused agent workflows so that material conclusions can be traced back to
 concrete files and line ranges.
 
 The product is designed around three rules:
@@ -68,9 +69,53 @@ flowchart LR
 This avoids independently recrawling the same change and keeps all conclusions
 grounded in the same base and head state.
 
+## Cross-platform installation
+
+Engineering Power is packaged as a standard Agent Skill. The portable source
+lives at [`.agents/skills/engineering-power`](.agents/skills/engineering-power),
+which GitHub Copilot recognizes as a project skill. The installer creates a
+self-contained copy for a chosen host.
+
+From the Engineering Power repository, install into a target project directory:
+
+```bash
+# GitHub Copilot CLI or VS Code agent
+python3 scripts/install_agent_skill.py --host copilot --target-root /path/to/project
+
+# Claude Code
+python3 scripts/install_agent_skill.py --host claude --target-root /path/to/project
+
+# Cursor
+python3 scripts/install_agent_skill.py --host cursor --target-root /path/to/project
+```
+
+The created locations are respectively:
+
+```text
+/path/to/project/.agents/skills/engineering-power
+/path/to/project/.claude/skills/engineering-power
+/path/to/project/.cursor/skills/engineering-power
+```
+
+For GitHub Copilot CLI, start or reload a session and verify the package:
+
+```text
+/skills reload
+/skills info engineering-power
+```
+
+GitHub Copilot, Claude Code, and Cursor can all run the local Git workflows:
+repositories cloned from Bitbucket, branch comparisons, working-tree changes,
+and downloaded patches. This is the supported path for repositories reachable
+only while connected to a corporate VPN. GitHub cloud agents are suitable for
+GitHub repositories and PRs, but cannot access a developer's local checkout or
+company VPN.
+
 ## Example usage
 
-Select a skill from Codex and provide a target:
+Select the Engineering Power skill from your agent host, or invoke
+`/engineering-power` where slash invocation is available, then provide a
+target:
 
 ```text
 $repo-intelligence /path/to/repository
@@ -98,7 +143,7 @@ and authorizes an implementation workflow.
 - Reports that exceed their profile deadline are finalized with a coverage
   limitation rather than represented as unrestricted results.
 
-## Plugin development and local update
+## Codex Plugin development and local update
 
 The canonical source repository is:
 
@@ -121,7 +166,8 @@ codex plugin add engineering-power@personal
 
 Start a new Codex task after reinstalling so that the updated skill registry is
 loaded. Editing the source repository alone does not hot-update the installed
-plugin cache.
+plugin cache. This Codex-specific adapter remains available alongside the
+standard cross-platform Agent Skill package.
 
 ## Validation
 
@@ -153,7 +199,9 @@ context selection, and specialized report contracts.
 
 ```text
 skills/                 User-invoked engineering workflows
+.agents/skills/         Standard portable Agent Skill entry point
 scripts/repo_evidence/  Deterministic GitHub, local Git, diff, cache, and validation engine
+scripts/install_agent_skill.py  Host-specific portable-skill installer
 references/             Evidence rules, report schemas, and workflow guidance
 tests/                  Plugin, collector, cache, report, and skill-contract tests
 ```
