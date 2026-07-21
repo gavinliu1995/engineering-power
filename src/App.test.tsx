@@ -20,6 +20,30 @@ test("renders the product headline on the home route", () => {
   ).toHaveAttribute("href", "/demo-report");
 });
 
+test("connects the hero CTA to the static demo report", () => {
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  expect(
+    screen.getByRole("link", { name: "View Demo Report" }),
+  ).toHaveAttribute("href", "/demo-report");
+});
+
+test("describes the three decision-ready outputs", () => {
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  expect(screen.getByText("Change Impact")).toBeInTheDocument();
+  expect(screen.getByText("API Contract Delta")).toBeInTheDocument();
+  expect(screen.getByText("Release Readiness")).toBeInTheDocument();
+});
+
 test("renders the demo report route", () => {
   render(
     <MemoryRouter initialEntries={["/demo-report"]}>
