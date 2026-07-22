@@ -201,6 +201,14 @@ test("uses the canonical GitHub repository URL", () => {
   );
 });
 
+test("uses GitHub as the direct top navigation destination", () => {
+  render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+  expect(screen.getByRole("link", { name: "GitHub" })).toHaveAttribute(
+    "href",
+    "https://github.com/gavinliu1995/engineering-power",
+  );
+});
+
 test("keeps the demo preview call to action available from the home page", () => {
   render(
     <MemoryRouter initialEntries={["/"]}>
