@@ -77,23 +77,56 @@ function QuickStartPage() {
   return (
     <main className="quick-start-page">
       <p className="eyebrow">Quick start</p>
-      <h1>Bring evidence into your coding workflow.</h1>
-      <p className="quick-start-intro">Choose your assistant, install Engineering Power, then start a cited repository or PR analysis without connecting a new web service.</p>
-      <div className="quick-start-grid">
-        <article>
-          <span className="guide-step">01</span>
+      <h1>Choose where you use Engineering Power.</h1>
+      <p className="quick-start-intro">Select your assistant to see the right installation path. Engineering Power stays focused on cited, decision-ready engineering work.</p>
+      <div className="assistant-choice-grid">
+        <Link className="assistant-choice assistant-choice-codex" to="/start/codex" aria-label="Use Engineering Power with Codex">
+          <span className="guide-step">Option 01</span>
           <h2>Codex</h2>
-          <p>Install the plugin from your personal marketplace, start a new task, then invoke a workflow against a repository or pull request.</p>
-          <code>$repo-intelligence /path/to/repository</code>
-        </article>
-        <article>
-          <span className="guide-step">02</span>
+          <p>Use the Engineering Power plugin inside a Codex task.</p>
+          <span className="choice-action">Use Engineering Power with Codex <span aria-hidden="true">→</span></span>
+        </Link>
+        <Link className="assistant-choice assistant-choice-copilot" to="/start/copilot" aria-label="Use Engineering Power with GitHub Copilot">
+          <span className="guide-step">Option 02</span>
           <h2>GitHub Copilot</h2>
-          <p>Use the same evidence-first prompt pattern in your Copilot workflow, keeping the repository or PR target explicit.</p>
-          <code>Analyze this PR with facts, inferences, unknowns, and citations.</code>
-        </article>
+          <p>Install the portable Engineering Power skill in your project.</p>
+          <span className="choice-action">Use Engineering Power with GitHub Copilot <span aria-hidden="true">→</span></span>
+        </Link>
       </div>
-      <Link className="button button-primary" to="/demo-report">View a demo report</Link>
+    </main>
+  );
+}
+
+function HostGuidePage({ host }: { host: "codex" | "copilot" }) {
+  const isCodex = host === "codex";
+  const heading = isCodex ? "Use Engineering Power in Codex." : "Use Engineering Power in GitHub Copilot.";
+
+  return (
+    <main className="quick-start-page host-guide-page">
+      <Link className="back-link" to="/start">← Choose another assistant</Link>
+      <p className="eyebrow">{isCodex ? "Codex plugin" : "Portable agent skill"}</p>
+      <h1>{heading}</h1>
+      <p className="quick-start-intro">
+        {isCodex
+          ? "Install the Engineering Power plugin, then describe the repository or pull request you want to understand."
+          : "Install Engineering Power into the project where GitHub Copilot works, then reload and verify the skill."}
+      </p>
+      <ol className="host-guide-steps">
+        {isCodex ? (
+          <>
+            <li><span>01</span><div><h2>Install the plugin</h2><p>Install Engineering Power from your Codex plugin marketplace.</p></div></li>
+            <li><span>02</span><div><h2>Start a task</h2><p>Start a new task and describe the repository or pull request you want Engineering Power to analyze.</p></div></li>
+            <li><span>03</span><div><h2>Ask for the decision you need</h2><p>Request an evidence-backed answer with facts, inferences, unknowns, and file citations.</p><code>Analyze this pull request with Engineering Power. Separate facts, inferences, and unknowns, with citations.</code></div></li>
+          </>
+        ) : (
+          <>
+            <li><span>01</span><div><h2>Install into your project</h2><p>Run the installer from the Engineering Power repository with your project as the target.</p><code>python3 scripts/install_agent_skill.py --host copilot --target-root /path/to/project</code></div></li>
+            <li><span>02</span><div><h2>Reload and verify</h2><p>In GitHub Copilot, reload skills and confirm Engineering Power is available.</p><code>/skills reload</code><code>/skills info engineering-power</code></div></li>
+            <li><span>03</span><div><h2>Invoke Engineering Power</h2><p>Use <code>/engineering-power</code> when slash invocation is available, then provide a repository, pull request, or local comparison.</p></div></li>
+          </>
+        )}
+      </ol>
+      <a className="button button-primary" href="https://github.com/gavinliu1995/engineering-power" target="_blank" rel="noreferrer">View installation files on GitHub</a>
     </main>
   );
 }
@@ -116,6 +149,8 @@ export default function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/demo-report" element={<DemoReportPage />} />
       <Route path="/start" element={<QuickStartPage />} />
+      <Route path="/start/codex" element={<HostGuidePage host="codex" />} />
+      <Route path="/start/copilot" element={<HostGuidePage host="copilot" />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

@@ -33,11 +33,26 @@ test("connects the hero CTA to the quick-start guide", () => {
   ).toHaveAttribute("href", "/start");
 });
 
-test("guides Codex and GitHub Copilot users from the quick-start route", () => {
+test("lets users choose Codex or GitHub Copilot from the quick-start route", () => {
   render(<MemoryRouter initialEntries={["/start"]}><App /></MemoryRouter>);
-  expect(screen.getByRole("heading", { name: /bring evidence into your coding workflow/i })).toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: "Codex" })).toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: "GitHub Copilot" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: /choose where you use engineering power/i })).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Use Engineering Power with Codex" })).toHaveAttribute("href", "/start/codex");
+  expect(screen.getByRole("link", { name: "Use Engineering Power with GitHub Copilot" })).toHaveAttribute("href", "/start/copilot");
+  expect(screen.queryByText("$repo-intelligence /path/to/repository")).not.toBeInTheDocument();
+});
+
+test("uses product-facing Codex guidance instead of an internal workflow name", () => {
+  render(<MemoryRouter initialEntries={["/start/codex"]}><App /></MemoryRouter>);
+  expect(screen.getByRole("heading", { name: /use engineering power in codex/i })).toBeInTheDocument();
+  expect(screen.getByText(/start a new task and describe the repository or pull request/i)).toBeInTheDocument();
+  expect(screen.queryByText("$repo-intelligence /path/to/repository")).not.toBeInTheDocument();
+});
+
+test("shows the verified GitHub Copilot setup steps", () => {
+  render(<MemoryRouter initialEntries={["/start/copilot"]}><App /></MemoryRouter>);
+  expect(screen.getByRole("heading", { name: /use engineering power in github copilot/i })).toBeInTheDocument();
+  expect(screen.getByText("/skills reload")).toBeInTheDocument();
+  expect(screen.getByText("/skills info engineering-power")).toBeInTheDocument();
 });
 
 test("describes the three decision-ready outputs", () => {
