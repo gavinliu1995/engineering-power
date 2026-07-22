@@ -119,7 +119,12 @@ class PluginLayoutTests(unittest.TestCase):
                 observed_display_names.add(interface.get("display_name"))
         self.assertEqual(len(observed_display_names), len(DISPLAY_NAMES))
 
-    def test_plugin_source_does_not_track_nested_worktree_payload(self):
+    def test_plugin_source_has_no_nested_worktree_payload(self):
+        self.assertFalse(
+            (ROOT / ".worktrees").exists(),
+            "Codex copies untracked source files into the installed plugin; "
+            "move development worktrees outside the plugin root before packaging.",
+        )
         tracked = subprocess.run(
             ["git", "ls-files", "--", ".worktrees"],
             cwd=ROOT,

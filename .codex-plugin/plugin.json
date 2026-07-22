@@ -1,6 +1,6 @@
 {
   "name": "engineering-power",
-  "version": "0.1.0+codex.20260715090714",
+  "version": "0.1.0+codex.20260722030756",
   "description": "Evidence-backed engineering workflows for repository understanding, PR analysis, dependency impact, API contracts, release notes, planning, testing, review, and release decisions.",
   "author": {
     "name": "Gavin Liu"
