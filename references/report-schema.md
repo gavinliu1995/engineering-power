@@ -10,6 +10,7 @@ supports it.
 - Evidence rules
 - Runtime metadata and profile limits
 - Diagram rules
+- Architecture Map report
 - Repository report
 - Pull-request report
 - Migration report extension
@@ -72,6 +73,55 @@ Deep requirements:
 - Up to three business flows when the additional evidence changes engineering
   decisions.
 - Preserve prioritization; Deep means wider evidence, not unbounded prose.
+
+## Architecture Map report
+
+Use exactly these level-two headings. Quick is limited to 7,000 Markdown
+characters, exactly two Mermaid diagrams, and no more than five prioritized
+risks. Deep preserves the same headings while widening evidence coverage.
+
+```markdown
+# Engineering Power Architecture Map
+
+Analyzed target: OWNER/REPOSITORY | /local/repository/path
+Analyzed commit: FULL_SHA
+Authentication: github-app | environment-token | anonymous-public | local-filesystem
+Profile: Quick | Deep
+Collection: cache hit | fresh; N files; X seconds
+Coverage: COLLECTED_FILES/TEXT_CANDIDATES text candidates
+Tree entries: TREE_ENTRIES
+Reasoning evidence: R files
+Missing layers: none | comma-separated layers
+Tests executed: yes (COMMAND) | no
+Report validation: {{REPOLENS_VALIDATION_STATUS}}
+Total elapsed: {{REPOLENS_TOTAL_ELAPSED}}
+
+## Target and Evidence
+
+## System Context and Runtime Units
+
+## Module Boundaries and Dependencies
+
+## Architecture Diagram
+
+Include one repository-specific Mermaid architecture diagram and citations.
+
+## Concrete Feature Flow
+
+Trace and draw at least one Page/Route → Provider/Service → Client/DAO chain
+using real repository symbols. Include confidence and citations.
+
+## Trust, State, and External Boundaries
+
+## Risks and Incremental Target State
+
+Prioritize 1–5 findings in Quick. Recommend incremental boundaries rather than
+a generic rewrite.
+
+## Unknowns
+
+## Evidence Index
+```
 
 ## Diagram rules
 

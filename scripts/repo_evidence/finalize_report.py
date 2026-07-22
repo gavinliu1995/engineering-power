@@ -104,7 +104,11 @@ def profile_errors(report, profile, mode=None):
             "Report must contain exactly one elapsed-time placeholder: "
             + ELAPSED_PLACEHOLDER
         )
-    max_chars = PROFILE_RULES[profile]["max_chars"]
+    max_chars = (
+        7_000
+        if profile == "quick" and mode == "architecture"
+        else PROFILE_RULES[profile]["max_chars"]
+    )
     if len(report) > max_chars:
         errors.append(
             f"{profile.title()} report exceeds {max_chars} characters: {len(report)}"
@@ -128,6 +132,21 @@ def profile_errors(report, profile, mode=None):
         if not 1 <= risk_items <= 5:
             errors.append(
                 "Quick repository report requires 1-5 prioritized risks; "
+                f"found {risk_items}"
+            )
+    if profile == "quick" and mode == "architecture":
+        architecture = section_body(report, "Architecture Diagram")
+        feature_flow = section_body(report, "Concrete Feature Flow")
+        if len(validate_report.MERMAID_PATTERN.findall(architecture)) != 1:
+            errors.append("Quick architecture report requires one architecture diagram")
+        if len(validate_report.MERMAID_PATTERN.findall(feature_flow)) != 1:
+            errors.append("Quick architecture report requires one concrete feature-flow diagram")
+        risk_items = list_item_count(
+            section_body(report, "Risks and Incremental Target State")
+        )
+        if not 1 <= risk_items <= 5:
+            errors.append(
+                "Quick architecture report requires 1-5 prioritized risks; "
                 f"found {risk_items}"
             )
     return errors

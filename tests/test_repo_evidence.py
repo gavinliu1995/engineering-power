@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import stat
 import sys
@@ -958,6 +959,130 @@ class ReportFinalizationTests(unittest.TestCase):
             )
             self.assertEqual(result["report_type"], "api-contract")
             self.assertEqual(result["validation"], "passed")
+
+    def create_architecture_report(self, root):
+        snapshot = root / "snapshot"
+        files = snapshot / "files"
+        files.mkdir(parents=True)
+        (files / "app.py").write_text(
+            "route = 1\nprovider = 2\nclient = 3\nstate = 4\ntrust = 5\n"
+            "runtime = 6\nboundary = 7\nrisk = 8\ntarget = 9\nunknown = 10\n",
+            encoding="utf-8",
+        )
+        (snapshot / "manifest.json").write_text(
+            json.dumps({"mode": "repository", "resolved_ref": "abc123"}),
+            encoding="utf-8",
+        )
+        report = root / "architecture.md"
+        report.write_text(
+            "# Engineering Power Architecture Map\n\n"
+            "Analyzed commit: abc123  \n"
+            "Profile: Quick  \n"
+            "Collection: cache hit  \n"
+            "Coverage: bounded snapshot  \n"
+            "Missing layers: none  \n"
+            "Tests executed: no  \n"
+            f"Report validation: {finalize_report.VALIDATION_PLACEHOLDER}  \n"
+            f"Total elapsed: {finalize_report.ELAPSED_PLACEHOLDER}\n\n"
+            "## Target and Evidence\n\nTarget and exact state. `app.py:1`\n\n"
+            "## System Context and Runtime Units\n\nRuntime unit. `app.py:6`\n\n"
+            "## Module Boundaries and Dependencies\n\nDependency direction. `app.py:7`\n\n"
+            "## Architecture Diagram\n\n"
+            "```mermaid\nflowchart LR\nRoute --> Provider\nProvider --> Client\n```\n\n"
+            "Evidence: `app.py:1-3`\n\n"
+            "## Concrete Feature Flow\n\n"
+            "Route → Provider/Service → Client/DAO. Confidence: High. `app.py:1-3`\n\n"
+            "```mermaid\nsequenceDiagram\nRoute->>Provider: request\nProvider->>Client: call\n```\n\n"
+            "## Trust, State, and External Boundaries\n\nState and trust boundary. `app.py:4-5`\n\n"
+            "## Risks and Incremental Target State\n\n"
+            "1. Medium: isolate orchestration incrementally. Confidence: High. `app.py:8-9`\n\n"
+            "## Unknowns\n\nRuntime deployment remains Unknown. `app.py:10`\n\n"
+            "## Evidence Index\n\n"
+            "- `app.py:1`\n- `app.py:2`\n- `app.py:3`\n- `app.py:4`\n"
+            "- `app.py:5`\n- `app.py:6`\n- `app.py:7`\n- `app.py:8`\n",
+            encoding="utf-8",
+        )
+        return snapshot, report
+
+    def test_architecture_report_type_passes_strict_contract(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            snapshot, draft = self.create_architecture_report(root)
+
+            result = finalize_report.finalize(
+                draft,
+                snapshot,
+                "quick",
+                time.time() - 1,
+                root / "final.md",
+                report_type="architecture",
+            )
+
+            self.assertEqual(result["report_type"], "architecture")
+            self.assertEqual(result["diagrams"], 2)
+            self.assertEqual(result["validation"], "passed")
+
+    def test_architecture_report_rejects_missing_concrete_feature_chain(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            snapshot, report = self.create_architecture_report(root)
+            content = report.read_text(encoding="utf-8").replace(
+                "Route → Provider/Service → Client/DAO.",
+                "A generic feature flow.",
+            )
+            content = content.replace(
+                "Route->>Provider: request\nProvider->>Client: call",
+                "A->>B: request\nB->>C: call",
+            )
+            report.write_text(content, encoding="utf-8")
+
+            _, _, _, errors, _ = validate_report.validate(
+                SimpleNamespace(
+                    report=str(report),
+                    snapshot=str(snapshot),
+                    report_type="architecture",
+                )
+            )
+
+            self.assertTrue(any("concrete" in error.lower() for error in errors))
+
+    def test_architecture_report_requires_two_diagrams(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            snapshot, report = self.create_architecture_report(root)
+            content = report.read_text(encoding="utf-8")
+            content = re.sub(
+                r"```mermaid\nsequenceDiagram.*?```\n",
+                "",
+                content,
+                count=1,
+                flags=re.DOTALL,
+            )
+            report.write_text(content, encoding="utf-8")
+
+            _, _, _, errors, _ = validate_report.validate(
+                SimpleNamespace(
+                    report=str(report),
+                    snapshot=str(snapshot),
+                    report_type="architecture",
+                )
+            )
+
+            self.assertTrue(any("2 Mermaid" in error for error in errors))
+
+    def test_quick_architecture_report_uses_7000_character_limit(self):
+        report = (
+            "Profile: Quick\n"
+            f"Report validation: {finalize_report.VALIDATION_PLACEHOLDER}\n"
+            f"Total elapsed: {finalize_report.ELAPSED_PLACEHOLDER}\n"
+            + ("x" * 7000)
+        )
+
+        errors = finalize_report.profile_errors(
+            report, "quick", "architecture"
+        )
+
+        self.assertTrue(any("7000" in error for error in errors))
 
 
 class CacheManagementTests(unittest.TestCase):

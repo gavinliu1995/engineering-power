@@ -30,6 +30,17 @@ PULL_REQUEST_HEADINGS = {
 }
 
 SPECIALIZED_REPORT_HEADINGS = {
+    "architecture": {
+        "Target and Evidence",
+        "System Context and Runtime Units",
+        "Module Boundaries and Dependencies",
+        "Architecture Diagram",
+        "Concrete Feature Flow",
+        "Trust, State, and External Boundaries",
+        "Risks and Incremental Target State",
+        "Unknowns",
+        "Evidence Index",
+    },
     "dependency-impact": {
         "Decision Summary",
         "Changed or Requested Surface",
@@ -162,7 +173,25 @@ def require_validation_categories(report, heading, errors):
 
 def specialized_contract_errors(report, report_type):
     errors = []
-    if report_type == "dependency-impact":
+    if report_type == "architecture":
+        feature_flow = section_body(report, "Concrete Feature Flow")
+        required_stages = (
+            ("Page or Route", r"\b(?:Page|Route|Controller|UI)\b"),
+            ("Provider or Service", r"\b(?:Provider|Service|Orchestrator)\b"),
+            ("Client or DAO", r"\b(?:Client|DAO|Repository|Gateway)\b"),
+        )
+        missing = [
+            label
+            for label, pattern in required_stages
+            if not re.search(pattern, feature_flow, re.IGNORECASE)
+        ]
+        if missing or not re.search(r"(?:→|-->|->>)", feature_flow):
+            errors.append(
+                "Concrete Feature Flow must trace a concrete Page/Route → "
+                "Provider/Service → Client/DAO chain; missing: "
+                + (", ".join(missing) if missing else "linked direction")
+            )
+    elif report_type == "dependency-impact":
         require_table_headers(
             report,
             "Dependency Propagation",
@@ -289,6 +318,7 @@ def validate(args):
     minimum_diagrams = {
         "repository": 2,
         "pull-request": 1,
+        "architecture": 2,
     }.get(report_type, 0)
     if len(diagrams) < minimum_diagrams:
         errors.append(
