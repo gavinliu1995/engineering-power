@@ -43,7 +43,9 @@ placeholders until `finalize_report.py` replaces them.
 ```text
 Profile: Quick | Deep
 Collection: cache hit | fresh; N files; X seconds
-Coverage: N/T text candidates; reasoning evidence R files
+Coverage: COLLECTED_FILES/TEXT_CANDIDATES text candidates
+Tree entries: TREE_ENTRIES
+Reasoning evidence: R files
 Missing layers: none | comma-separated layers
 Tests executed: yes (COMMAND) | no
 Report validation: {{REPOLENS_VALIDATION_STATUS}}
@@ -167,7 +169,9 @@ Analyzed commit: FULL_SHA
 Authentication: github-app | environment-token | anonymous-public | local-filesystem
 Profile: Quick | Deep
 Collection: cache hit | fresh; N files; X seconds
-Coverage: N/T text candidates; reasoning evidence R files
+Coverage: COLLECTED_FILES/TEXT_CANDIDATES text candidates
+Tree entries: TREE_ENTRIES
+Reasoning evidence: R files
 Missing layers: none | comma-separated layers
 Tests executed: yes (COMMAND) | no
 Report validation: {{REPOLENS_VALIDATION_STATUS}}
@@ -228,7 +232,9 @@ Base commit: FULL_SHA
 Head commit: FULL_SHA | unavailable for patch-file simulation
 Profile: Quick | Deep
 Collection: cache hit | fresh; N files; X seconds
-Coverage: N/T text candidates; reasoning evidence R files
+Coverage: COLLECTED_FILES/TEXT_CANDIDATES text candidates
+Tree entries: TREE_ENTRIES
+Reasoning evidence: R files
 Missing layers: none | comma-separated layers
 Tests executed: yes (COMMAND) | no
 Report validation: {{REPOLENS_VALIDATION_STATUS}}

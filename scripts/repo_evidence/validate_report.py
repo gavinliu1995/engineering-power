@@ -72,6 +72,13 @@ CITATION_PATTERN = re.compile(
 
 MERMAID_PATTERN = re.compile(r"```mermaid\s*\n(.*?)```", re.DOTALL | re.IGNORECASE)
 HEADING_PATTERN = re.compile(r"^##\s+(.+?)\s*$", re.MULTILINE)
+COVERAGE_PATTERN = re.compile(
+    r"^Coverage:\s*(?P<collected>\d+)/(?P<candidates>\d+)\s+text candidates\s*$",
+    re.MULTILINE,
+)
+TREE_ENTRIES_PATTERN = re.compile(
+    r"^Tree entries:\s*(?P<count>\d+)\s*$", re.MULTILINE
+)
 SNAPSHOT_EVIDENCE_FILES = {
     "manifest.json",
     "pull-request-files.json",
@@ -202,6 +209,43 @@ def specialized_contract_errors(report, report_type):
     return errors
 
 
+def coverage_contract_errors(report, manifest):
+    stats = manifest.get("stats", {})
+    required = ("collected_files", "text_candidates", "tree_entries")
+    if not all(isinstance(stats.get(key), int) for key in required):
+        return []
+
+    errors = []
+    coverage = COVERAGE_PATTERN.search(report)
+    if not coverage:
+        errors.append(
+            "Coverage must use manifest-backed format: "
+            "Coverage: COLLECTED/TEXT_CANDIDATES text candidates"
+        )
+    else:
+        actual = (
+            int(coverage.group("collected")),
+            int(coverage.group("candidates")),
+        )
+        expected = (stats["collected_files"], stats["text_candidates"])
+        if actual != expected:
+            errors.append(
+                "Coverage disagrees with manifest statistics: "
+                f"expected {expected[0]}/{expected[1]} text candidates, "
+                f"found {actual[0]}/{actual[1]}"
+            )
+
+    tree_entries = TREE_ENTRIES_PATTERN.search(report)
+    if not tree_entries:
+        errors.append("Report is missing manifest-backed Tree entries metadata")
+    elif int(tree_entries.group("count")) != stats["tree_entries"]:
+        errors.append(
+            "Tree entries disagrees with manifest statistics: "
+            f"expected {stats['tree_entries']}, found {tree_entries.group('count')}"
+        )
+    return errors
+
+
 def validate(args):
     report_path = Path(args.report).expanduser().resolve()
     snapshot = Path(args.snapshot).expanduser().resolve()
@@ -232,6 +276,8 @@ def validate(args):
         required_headings = SPECIALIZED_REPORT_HEADINGS[report_type]
     errors = []
     warnings = []
+
+    errors.extend(coverage_contract_errors(report, manifest))
 
     missing_headings = sorted(required_headings - headings)
     if missing_headings:

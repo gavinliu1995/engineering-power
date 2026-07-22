@@ -786,6 +786,64 @@ class ReportFinalizationTests(unittest.TestCase):
                 any("deadline" in warning.lower() for warning in result["warnings"])
             )
 
+    def test_finalizer_rewrites_coverage_from_manifest_statistics(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            snapshot, draft = self.create_snapshot_and_report(root)
+            manifest_path = snapshot / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["stats"] = {
+                "collected_files": 360,
+                "text_candidates": 2866,
+                "tree_entries": 3608,
+            }
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            content = draft.read_text(encoding="utf-8").replace(
+                "Coverage: 1/1 candidates; reasoning evidence 1",
+                "Coverage: 2866/3608 text candidates",
+            )
+            draft.write_text(content, encoding="utf-8")
+            output = root / "final.md"
+
+            finalize_report.finalize(
+                draft,
+                snapshot,
+                "quick",
+                time.time() - 1,
+                output,
+            )
+            report = output.read_text(encoding="utf-8")
+
+            self.assertIn("Coverage: 360/2866 text candidates", report)
+            self.assertIn("Tree entries: 3608", report)
+            self.assertNotIn("2866/3608 text candidates", report)
+
+    def test_validator_rejects_coverage_that_disagrees_with_manifest(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            snapshot, report = self.create_snapshot_and_report(root)
+            manifest_path = snapshot / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["stats"] = {
+                "collected_files": 360,
+                "text_candidates": 2866,
+                "tree_entries": 3608,
+            }
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            content = report.read_text(encoding="utf-8").replace(
+                "Coverage: 1/1 candidates; reasoning evidence 1",
+                "Coverage: 2866/3608 text candidates\nTree entries: 3608",
+            )
+            report.write_text(content, encoding="utf-8")
+
+            _, _, _, errors, _ = validate_report.validate(
+                SimpleNamespace(
+                    report=str(report), snapshot=str(snapshot), report_type="repository"
+                )
+            )
+
+            self.assertTrue(any("Coverage" in error for error in errors))
+
     def test_quick_profile_rejects_long_report(self):
         report = "Profile: Quick\n" + (
             "x" * finalize_report.PROFILE_RULES["quick"]["max_chars"]
