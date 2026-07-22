@@ -10,7 +10,7 @@ REDACTION = "[REDACTED]"
 
 SECRET_KEY = (
     r"(?:pass(?:word|wd)?|pwd|secret|token|api[_-]?key|apikey|"
-    r"access[_-]?key|client[_-]?secret|private[_-]?key|credentials?)"
+    r"access[_-]?key|client[_-]?secret|private[_-]?key|credentials?|cookie)"
 )
 
 PRIVATE_KEY_BEGIN = re.compile(r"-----BEGIN [^-]*PRIVATE KEY-----", re.IGNORECASE)
@@ -49,6 +49,11 @@ CLI_UNQUOTED = re.compile(
 AUTHORIZATION = re.compile(
     r"(?P<prefix>\bAuthorization\s*:\s*(?:Bearer|Basic)\s+)"
     r"(?P<value>[^\s,;]+)",
+    re.IGNORECASE,
+)
+
+COOKIE_HEADER = re.compile(
+    r"(?P<prefix>\b(?:Cookie|Set-Cookie)\s*:\s*)(?P<value>.*)$",
     re.IGNORECASE,
 )
 
@@ -91,6 +96,7 @@ def redact_lines(lines: list[str]) -> list[str]:
             continue
 
         value = XML_ELEMENT.sub(_replace_wrapped_value, line)
+        value = COOKIE_HEADER.sub(_replace_value, value)
         value = AUTHORIZATION.sub(_replace_value, value)
         value = URL_USER_INFO.sub(_replace_wrapped_value, value)
         value = CLI_QUOTED.sub(_replace_quoted_value, value)

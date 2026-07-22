@@ -441,6 +441,9 @@ class LocalCollectionTests(unittest.TestCase):
                 f"tool --password={synthetic_secret}",
                 f"Authorization: Bearer {synthetic_secret}",
                 f"Authorization: Basic {synthetic_secret}",
+                f"Cookie: session={synthetic_secret}; preference=dark",
+                f"Set-Cookie: session={synthetic_secret}; HttpOnly; Secure",
+                f"COOKIE={synthetic_secret}",
                 f"https://user:{synthetic_secret}@example.test/path",
                 "-----BEGIN PRIVATE KEY-----",
                 synthetic_secret,
@@ -452,7 +455,7 @@ class LocalCollectionTests(unittest.TestCase):
         redacted = redact_context.redact_text(source)
 
         self.assertNotIn(synthetic_secret, redacted)
-        self.assertGreaterEqual(redacted.count("[REDACTED]"), 10)
+        self.assertGreaterEqual(redacted.count("[REDACTED]"), 13)
         self.assertEqual(len(source.splitlines()), len(redacted.splitlines()))
         self.assertIn("-----BEGIN PRIVATE KEY-----", redacted)
         self.assertIn("-----END PRIVATE KEY-----", redacted)
@@ -463,7 +466,7 @@ class LocalCollectionTests(unittest.TestCase):
             repository, _, _ = self.create_repository(root)
             synthetic_secret = "analysis-context-dummy-secret"
             (repository / "app.py").write_text(
-                f'password = "{synthetic_secret}"\nvalue = 1\n',
+                f'COOKIE = "{synthetic_secret}"\nvalue = 1\n',
                 encoding="utf-8",
             )
             self.git(repository, "add", "app.py")
@@ -479,7 +482,7 @@ class LocalCollectionTests(unittest.TestCase):
             context = output.read_text(encoding="utf-8")
 
             self.assertNotIn(synthetic_secret, context)
-            self.assertIn('password = "[REDACTED]"', context)
+            self.assertIn('COOKIE = "[REDACTED]"', context)
             self.assertIn("     2 | value = 1", context)
 
     def test_analysis_context_discloses_layers_with_no_candidates(self):

@@ -1,3 +1,4 @@
+import importlib.util
 from pathlib import Path
 import subprocess
 import tempfile
@@ -9,6 +10,33 @@ PORTABLE_SKILL = ROOT / ".agents" / "skills" / "engineering-power"
 
 
 class CrossPlatformSkillTests(unittest.TestCase):
+    def test_portable_skill_redacts_cookie_values_before_model_context(self):
+        """Exercise the exact redactor shipped to Copilot, not the source copy."""
+        redactor_path = (
+            PORTABLE_SKILL / "scripts" / "repo_evidence" / "redact_context.py"
+        )
+        spec = importlib.util.spec_from_file_location("portable_redactor", redactor_path)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        literal = "engineering-power-cookie-regression-test-12345"
+        redacted = module.redact_text(
+            "\n".join(
+                (
+                    f'COOKIE = "{literal}"',
+                    f"Cookie: session={literal}; preference=dark",
+                    f"Set-Cookie: session={literal}; HttpOnly; Secure",
+                )
+            )
+        )
+
+        self.assertNotIn(literal, redacted)
+        self.assertIn('COOKIE = "[REDACTED]"', redacted)
+        self.assertIn("Cookie: [REDACTED]", redacted)
+        self.assertIn("Set-Cookie: [REDACTED]", redacted)
+
     def test_portable_skill_contract(self):
         skill = PORTABLE_SKILL / "SKILL.md"
         self.assertTrue(skill.is_file(), skill)
