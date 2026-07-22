@@ -52,11 +52,20 @@ repository state, cache status, coverage limits, and authentication method.
    Generator, and Release Readiness. Do not recollect the same target per
    derived report.
 4. Use `prepare_analysis_context.py` or `prepare_workflow_context.py` to create
-   citation-ready context.
+   citation-ready context. These builders redact secret-like values before any
+   evidence enters model context; never bypass them by pasting raw sensitive
+   source into the conversation.
 5. Distinguish facts, inferences, and unknowns. Distinguish executed tests from
    discovered and recommended tests.
 6. Validate an inline Markdown report with `finalize_report.py` before delivery.
    If coverage is limited by a deadline or missing evidence, state that clearly.
+
+For Architecture Map, load [Architecture focus](references/architecture-focus.md) and [Report schema](references/report-schema.md), trace a concrete Page/Route → Provider/Service → Client/DAO chain, and finalize with `--report-type architecture`.
+
+Use the collector's `report_deadline_epoch` as an active budget. With more than
+30 seconds remaining, perform at most one targeted search needed to close a
+material evidence gap. With 30 seconds or less remaining, stop expanding
+evidence and compose the smallest valid report from the bounded context.
 
 ## Platform rules
 
@@ -75,6 +84,8 @@ Load only the resources required for the selected workflow:
 
 - [Report schema](references/report-schema.md): evidence rules, exact formal
   report headings, diagrams, risk, confidence, and runtime metadata.
+- [Architecture focus](references/architecture-focus.md): Architecture Map
+  boundaries, concrete feature flow, target state, and Quick time budget.
 - [Local analysis](references/local-analysis.md): local repository, Git range,
   working-tree, downloaded patch, and offline Bitbucket rules.
 - [Pull request analysis](references/pull-request-analysis.md): change
@@ -85,6 +96,13 @@ Load only the resources required for the selected workflow:
 Include the target, exact commit or base/head state, profile, cache status,
 collection coverage, citations, and the validation result. Never claim that a
 test passed unless this session ran it and observed a successful result.
+
+Deliver the validated formal report inline in the conversation, including its
+Mermaid diagrams. A saved artifact is supplemental only and must never replace
+the inline report. If a host imposes a response-length limit, inline at least
+the target and Git state, manifest-backed coverage, both required diagrams,
+prioritized risks, validation status, and Unknowns; then link the supplemental
+artifact.
 
 Use the following minimum structure for a generic workflow. When a linked
 workflow schema defines exact headings, that schema takes precedence; preserve

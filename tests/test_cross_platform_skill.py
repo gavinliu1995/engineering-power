@@ -36,6 +36,7 @@ class CrossPlatformSkillTests(unittest.TestCase):
         self.assertIn("router/orchestrator", content.lower())
         for resource in (
             "[Report schema](references/report-schema.md)",
+            "[Architecture focus](references/architecture-focus.md)",
             "[Local analysis](references/local-analysis.md)",
             "[Pull request analysis](references/pull-request-analysis.md)",
         ):
@@ -50,6 +51,25 @@ class CrossPlatformSkillTests(unittest.TestCase):
             "## Unknowns",
         ):
             self.assertIn(section, content)
+
+    def test_portable_skill_enforces_architecture_and_inline_delivery_contracts(self):
+        content = (PORTABLE_SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+        for expected in (
+            "--report-type architecture",
+            "Page/Route",
+            "Provider/Service",
+            "Client/DAO",
+            "30 seconds or less",
+            "inline",
+            "supplemental",
+            "redact",
+        ):
+            self.assertIn(expected, content)
+        self.assertRegex(
+            content,
+            r"Architecture Map.*architecture-focus\.md.*report-schema\.md",
+        )
 
     def test_portable_skill_is_self_contained_for_gh_skill_install(self):
         self.assertTrue(

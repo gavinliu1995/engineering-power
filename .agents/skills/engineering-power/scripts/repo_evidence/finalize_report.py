@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 import sys
+import tempfile
 import time
 from types import SimpleNamespace
 
@@ -29,6 +30,45 @@ REQUIRED_METADATA = (
     "Report validation:",
     "Total elapsed:",
 )
+
+
+def normalize_coverage(report, manifest):
+    stats = manifest.get("stats", {})
+    required = ("collected_files", "text_candidates", "tree_entries")
+    if not all(isinstance(stats.get(key), int) for key in required):
+        return report
+
+    coverage_line = (
+        f"Coverage: {stats['collected_files']}/{stats['text_candidates']} "
+        "text candidates"
+    )
+    tree_line = f"Tree entries: {stats['tree_entries']}"
+    if re.search(r"^Coverage:.*$", report, re.MULTILINE):
+        report = re.sub(
+            r"^Coverage:.*$", coverage_line, report, count=1, flags=re.MULTILINE
+        )
+    else:
+        report = re.sub(
+            r"^(Collection:.*)$",
+            rf"\1\n{coverage_line}",
+            report,
+            count=1,
+            flags=re.MULTILINE,
+        )
+
+    if re.search(r"^Tree entries:.*$", report, re.MULTILINE):
+        report = re.sub(
+            r"^Tree entries:.*$", tree_line, report, count=1, flags=re.MULTILINE
+        )
+    else:
+        report = re.sub(
+            r"^(Coverage:.*)$",
+            rf"\1\n{tree_line}",
+            report,
+            count=1,
+            flags=re.MULTILINE,
+        )
+    return report
 
 
 def section_body(report, heading):
@@ -64,7 +104,11 @@ def profile_errors(report, profile, mode=None):
             "Report must contain exactly one elapsed-time placeholder: "
             + ELAPSED_PLACEHOLDER
         )
-    max_chars = PROFILE_RULES[profile]["max_chars"]
+    max_chars = (
+        7_000
+        if profile == "quick" and mode == "architecture"
+        else PROFILE_RULES[profile]["max_chars"]
+    )
     if len(report) > max_chars:
         errors.append(
             f"{profile.title()} report exceeds {max_chars} characters: {len(report)}"
@@ -90,18 +134,53 @@ def profile_errors(report, profile, mode=None):
                 "Quick repository report requires 1-5 prioritized risks; "
                 f"found {risk_items}"
             )
+    if profile == "quick" and mode == "architecture":
+        architecture = section_body(report, "Architecture Diagram")
+        feature_flow = section_body(report, "Concrete Feature Flow")
+        if len(validate_report.MERMAID_PATTERN.findall(architecture)) != 1:
+            errors.append("Quick architecture report requires one architecture diagram")
+        if len(validate_report.MERMAID_PATTERN.findall(feature_flow)) != 1:
+            errors.append("Quick architecture report requires one concrete feature-flow diagram")
+        risk_items = list_item_count(
+            section_body(report, "Risks and Incremental Target State")
+        )
+        if not 1 <= risk_items <= 5:
+            errors.append(
+                "Quick architecture report requires 1-5 prioritized risks; "
+                f"found {risk_items}"
+            )
     return errors
 
 
 def finalize(draft, snapshot, profile, started_at_epoch, output, report_type=None):
     if started_at_epoch <= 0:
         raise RuntimeError("--started-at-epoch must be greater than zero")
-    report = draft.read_text(encoding="utf-8")
-    mode, diagrams, citations, errors, warnings = validate_report.validate(
-        SimpleNamespace(
-            report=str(draft), snapshot=str(snapshot), report_type=report_type
-        )
+    manifest = json.loads(
+        (Path(snapshot) / "manifest.json").read_text(encoding="utf-8")
     )
+    report = normalize_coverage(draft.read_text(encoding="utf-8"), manifest)
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            suffix=".md",
+            prefix="repolens-normalized-",
+            dir=draft.parent,
+            delete=False,
+        ) as temporary:
+            temporary.write(report)
+            temporary_path = Path(temporary.name)
+        mode, diagrams, citations, errors, warnings = validate_report.validate(
+            SimpleNamespace(
+                report=str(temporary_path),
+                snapshot=str(snapshot),
+                report_type=report_type,
+            )
+        )
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
     errors.extend(profile_errors(report, profile, mode))
     if errors:
         raise RuntimeError("; ".join(errors))
@@ -138,9 +217,7 @@ def finalize(draft, snapshot, profile, started_at_epoch, output, report_type=Non
         output.unlink(missing_ok=True)
         raise RuntimeError("Final report validation failed: " + "; ".join(final_errors))
 
-    snapshot_mode = json.loads(
-        (Path(snapshot) / "manifest.json").read_text(encoding="utf-8")
-    ).get("mode")
+    snapshot_mode = manifest.get("mode")
     return {
         "report": str(output.resolve()),
         "profile": profile,

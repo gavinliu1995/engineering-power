@@ -30,6 +30,17 @@ PULL_REQUEST_HEADINGS = {
 }
 
 SPECIALIZED_REPORT_HEADINGS = {
+    "architecture": {
+        "Target and Evidence",
+        "System Context and Runtime Units",
+        "Module Boundaries and Dependencies",
+        "Architecture Diagram",
+        "Concrete Feature Flow",
+        "Trust, State, and External Boundaries",
+        "Risks and Incremental Target State",
+        "Unknowns",
+        "Evidence Index",
+    },
     "dependency-impact": {
         "Decision Summary",
         "Changed or Requested Surface",
@@ -72,6 +83,13 @@ CITATION_PATTERN = re.compile(
 
 MERMAID_PATTERN = re.compile(r"```mermaid\s*\n(.*?)```", re.DOTALL | re.IGNORECASE)
 HEADING_PATTERN = re.compile(r"^##\s+(.+?)\s*$", re.MULTILINE)
+COVERAGE_PATTERN = re.compile(
+    r"^Coverage:\s*(?P<collected>\d+)/(?P<candidates>\d+)\s+text candidates\s*$",
+    re.MULTILINE,
+)
+TREE_ENTRIES_PATTERN = re.compile(
+    r"^Tree entries:\s*(?P<count>\d+)\s*$", re.MULTILINE
+)
 SNAPSHOT_EVIDENCE_FILES = {
     "manifest.json",
     "pull-request-files.json",
@@ -155,7 +173,25 @@ def require_validation_categories(report, heading, errors):
 
 def specialized_contract_errors(report, report_type):
     errors = []
-    if report_type == "dependency-impact":
+    if report_type == "architecture":
+        feature_flow = section_body(report, "Concrete Feature Flow")
+        required_stages = (
+            ("Page or Route", r"\b(?:Page|Route|Controller|UI)\b"),
+            ("Provider or Service", r"\b(?:Provider|Service|Orchestrator)\b"),
+            ("Client or DAO", r"\b(?:Client|DAO|Repository|Gateway)\b"),
+        )
+        missing = [
+            label
+            for label, pattern in required_stages
+            if not re.search(pattern, feature_flow, re.IGNORECASE)
+        ]
+        if missing or not re.search(r"(?:→|-->|->>)", feature_flow):
+            errors.append(
+                "Concrete Feature Flow must trace a concrete Page/Route → "
+                "Provider/Service → Client/DAO chain; missing: "
+                + (", ".join(missing) if missing else "linked direction")
+            )
+    elif report_type == "dependency-impact":
         require_table_headers(
             report,
             "Dependency Propagation",
@@ -202,6 +238,43 @@ def specialized_contract_errors(report, report_type):
     return errors
 
 
+def coverage_contract_errors(report, manifest):
+    stats = manifest.get("stats", {})
+    required = ("collected_files", "text_candidates", "tree_entries")
+    if not all(isinstance(stats.get(key), int) for key in required):
+        return []
+
+    errors = []
+    coverage = COVERAGE_PATTERN.search(report)
+    if not coverage:
+        errors.append(
+            "Coverage must use manifest-backed format: "
+            "Coverage: COLLECTED/TEXT_CANDIDATES text candidates"
+        )
+    else:
+        actual = (
+            int(coverage.group("collected")),
+            int(coverage.group("candidates")),
+        )
+        expected = (stats["collected_files"], stats["text_candidates"])
+        if actual != expected:
+            errors.append(
+                "Coverage disagrees with manifest statistics: "
+                f"expected {expected[0]}/{expected[1]} text candidates, "
+                f"found {actual[0]}/{actual[1]}"
+            )
+
+    tree_entries = TREE_ENTRIES_PATTERN.search(report)
+    if not tree_entries:
+        errors.append("Report is missing manifest-backed Tree entries metadata")
+    elif int(tree_entries.group("count")) != stats["tree_entries"]:
+        errors.append(
+            "Tree entries disagrees with manifest statistics: "
+            f"expected {stats['tree_entries']}, found {tree_entries.group('count')}"
+        )
+    return errors
+
+
 def validate(args):
     report_path = Path(args.report).expanduser().resolve()
     snapshot = Path(args.snapshot).expanduser().resolve()
@@ -233,6 +306,8 @@ def validate(args):
     errors = []
     warnings = []
 
+    errors.extend(coverage_contract_errors(report, manifest))
+
     missing_headings = sorted(required_headings - headings)
     if missing_headings:
         errors.append("Missing required sections: " + ", ".join(missing_headings))
@@ -243,6 +318,7 @@ def validate(args):
     minimum_diagrams = {
         "repository": 2,
         "pull-request": 1,
+        "architecture": 2,
     }.get(report_type, 0)
     if len(diagrams) < minimum_diagrams:
         errors.append(

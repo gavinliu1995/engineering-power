@@ -350,6 +350,24 @@ class LocalCollectionTests(unittest.TestCase):
                 self.assertFalse(third["cache"]["hit"])
                 self.assertNotEqual(first_output, third_output)
 
+    def test_explicit_output_does_not_claim_shared_cache_hit(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, _, _ = self.create_repository(root)
+            cache = root / "cache"
+            with mock.patch.dict(
+                os.environ, {"REPOLENS_CACHE_DIR": str(cache)}, clear=False
+            ):
+                _, first = local_collector.collect(
+                    self.args(repository, root / "first-snapshot")
+                )
+                _, second = local_collector.collect(
+                    self.args(repository, root / "second-snapshot")
+                )
+
+            self.assertFalse(first["cache"]["hit"])
+            self.assertFalse(second["cache"]["hit"])
+
     def test_working_tree_cache_fingerprint_changes_with_edits(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
