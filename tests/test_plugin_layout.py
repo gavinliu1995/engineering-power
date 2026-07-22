@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 import re
+import subprocess
 import unittest
 
 
@@ -118,8 +119,15 @@ class PluginLayoutTests(unittest.TestCase):
                 observed_display_names.add(interface.get("display_name"))
         self.assertEqual(len(observed_display_names), len(DISPLAY_NAMES))
 
-    def test_plugin_source_has_no_nested_worktree_payload(self):
-        self.assertFalse((ROOT / ".worktrees").exists())
+    def test_plugin_source_does_not_track_nested_worktree_payload(self):
+        tracked = subprocess.run(
+            ["git", "ls-files", "--", ".worktrees"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.splitlines()
+        self.assertEqual(tracked, [], f"Nested worktree payload is tracked: {tracked}")
 
 
 if __name__ == "__main__":
