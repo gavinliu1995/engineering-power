@@ -419,3 +419,123 @@ h1,h2,h3 { color: #171814; letter-spacing: -.06em; } p { color: var(--text-muted
 @media (prefers-reduced-motion: reduce) {
   .intelligence-flow-field { transform: none; }
 }
+
+/* Citation Frame brand and plain-language product pass. */
+.brand {
+  gap: .72rem;
+  font-size: 1.05rem;
+}
+.brand-mark,
+.home-header-shell .brand-mark {
+  display: block;
+  width: 2.45rem;
+  height: auto;
+  flex: 0 0 auto;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  object-fit: contain;
+}
+.hero-layout {
+  grid-template-columns: minmax(0, 50rem) minmax(0, 1fr);
+}
+.hero-content {
+  max-width: 47rem;
+}
+.hero h1 {
+  max-width: 45rem;
+  font-size: clamp(3.6rem, 4.6vw, 5rem);
+  text-wrap: balance;
+}
+.hero-copy {
+  max-width: 39rem;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.2rem;
+}
+.hero-cta {
+  min-width: 0;
+  padding-inline: 1.6rem;
+}
+.hero-secondary-link {
+  padding: .65rem .15rem;
+  border-bottom: 1px solid rgba(247, 248, 244, .42);
+  color: #f7f8f4;
+  font-size: .92rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color .18s ease, color .18s ease;
+}
+.hero-secondary-link:hover {
+  border-color: #c9ff43;
+  color: #c9ff43;
+}
+.quick-start-intro {
+  max-width: 49rem;
+}
+.assistant-choice-grid {
+  margin-top: 3.5rem;
+}
+.assistant-choice {
+  min-height: 19rem;
+}
+.assistant-choice h2 {
+  font-size: clamp(2.2rem, 3.4vw, 3.4rem);
+  text-wrap: balance;
+}
+.assistant-choice-claude {
+  border: 1px solid #d9dbd2;
+  background: #fff;
+  color: #171814;
+}
+.assistant-choice-claude p {
+  color: #62655e;
+}
+.assistant-choice-cursor {
+  background: #11130f;
+  color: #fff;
+  box-shadow: 0 16px 36px rgba(22, 25, 13, .14);
+}
+.assistant-choice-cursor h2 {
+  color: #fff;
+}
+.assistant-choice-cursor p {
+  color: #c9cdc2;
+}
+.assistant-choice-claude .guide-step {
+  color: #708000;
+}
+.assistant-choice-cursor .guide-step {
+  color: #c9ff43;
+}
+
+@media (max-width: 900px) {
+  .hero-layout {
+    grid-template-columns: 1fr;
+  }
+  .hero h1 {
+    max-width: 41rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .brand {
+    gap: .6rem;
+    font-size: .96rem;
+  }
+  .brand-mark,
+  .home-header-shell .brand-mark {
+    width: 2.1rem;
+  }
+  .hero h1 {
+    font-size: clamp(3rem, 14.5vw, 4.1rem);
+  }
+  .hero-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: .8rem;
+  }
+}

@@ -1,6 +1,7 @@
 # Engineering Power
 
-Evidence-backed AI engineering workflows for Codex.
+Evidence-backed repository and change analysis for Codex, GitHub Copilot,
+Claude Code, and Cursor.
 
 Engineering Power helps engineers understand repositories and review changes
 without treating model intuition as source truth. It accepts GitHub repositories,
@@ -12,7 +13,7 @@ test status, collection coverage, and explicit unknowns.
 
 General-purpose AI can summarize code, but engineering decisions need stronger
 evidence. Engineering Power combines a deterministic repository evidence engine
-with focused Codex workflows so that material conclusions can be traced back to
+with focused agent workflows so that material conclusions can be traced back to
 concrete files and line ranges.
 
 The product is designed around three rules:

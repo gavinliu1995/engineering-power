@@ -4,7 +4,14 @@ export function Header() {
   return (
     <header className="site-header">
       <a className="brand" href="#top" aria-label={`${siteCopy.brand} home`}>
-        <span className="brand-mark" aria-hidden="true">E</span>
+        <img
+          className="brand-mark"
+          src="/images/engineering-power-citation-frame-header.png"
+          alt=""
+          aria-hidden="true"
+          width="930"
+          height="650"
+        />
         {siteCopy.brand}
       </a>
       <a

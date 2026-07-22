@@ -127,34 +127,34 @@ export const reportData = {
 } as const satisfies DemoReport;
 
 export const evidenceFlow = [
-  "Pull request or local comparison",
-  "One exact evidence snapshot",
-  "Cited engineering outputs",
-  "Decision-ready summary",
+  "Repository, PR, local comparison, working tree, or patch",
+  "One bounded evidence snapshot",
+  "Cited engineering analysis",
+  "Human review and decision",
 ];
 
 export const outputs: Output[] = [
   {
     title: "Change Impact",
-    description: "See the modules, callers, and behavior a change can touch.",
-    detail: "Turn a diff into an evidence-backed blast-radius assessment.",
+    description: "Trace evidenced code, configuration, and test relationships.",
+    detail: "Keep inferred runtime impact clearly labeled for reviewers.",
   },
   {
     title: "API Contract Delta",
-    description: "Surface compatibility changes before they surprise consumers.",
-    detail: "Translate implementation differences into a clear contract delta.",
+    description: "Describe discovered API surface changes and compatibility risks.",
+    detail: "Keep missing evidence visible instead of implying a guarantee.",
   },
   {
     title: "Release Readiness",
-    description: "Review release risk with traceable evidence, not instinct.",
-    detail: "Collect the checks, caveats, and decisions needed to ship confidently.",
+    description: "Summarize evidence, validation status, risks, and release conditions.",
+    detail: "Give people a cited brief for the final release decision.",
   },
 ];
 
 export const homepageEvidenceStates: readonly EvidenceState[] = [
   {
     label: "Facts",
-    description: "Observed code, configuration, and test evidence tied to the exact snapshot.",
+    description: "Observed code, configuration, and test evidence tied to the analyzed snapshot.",
   },
   {
     label: "Inferences",
@@ -175,22 +175,22 @@ export const trustBoundaries: TrustBoundary[] = [
   {
     title: "Evidence stays specific",
     description:
-      "Every conclusion is grounded in the exact repository snapshot being analyzed.",
-  },
-  {
-    title: "Reasoning stays traceable",
-    description:
-      "Citations keep reviewers connected to the code, tests, and configuration behind each recommendation.",
+      "Material technical claims cite the analyzed snapshot, while limitations remain explicit.",
   },
   {
     title: "Validation states stay distinct",
     description:
-      "Executed checks are run in the captured snapshot. Discovered checks are evidence found, not tests run. Recommended checks are next steps, not completed validation.",
+      "Executed checks have observed results. Discovered and recommended checks are labeled separately, not presented as completed validation.",
   },
   {
-    title: "Coverage has limits",
+    title: "Missing evidence stays visible",
     description:
-      "A deadline or incomplete coverage can limit a report; those limits remain explicit instead of becoming certainty.",
+      "Missing or incomplete evidence stays visible instead of being converted into certainty.",
+  },
+  {
+    title: "Read-only by default",
+    description:
+      "Target repositories stay read-only unless you separately authorize an implementation workflow.",
   },
   {
     title: "Decisions stay yours",
@@ -202,24 +202,24 @@ export const trustBoundaries: TrustBoundary[] = [
 export const siteCopy = {
   brand: "Engineering Power",
   hero: {
-    eyebrow: "AI-native developer platform",
-    title: "Engineering moves at the speed of intelligence.",
+    eyebrow: "Evidence-backed repository and change analysis",
+    title: "Turn code evidence into cited engineering reports.",
     description:
-      "Unify agents, reusable skills, repository context, and delivery in one evidence-backed engineering workflow.",
-    cta: "Get started",
+      "Engineering Power analyzes a repository, pull request, or local change and returns cited findings, explicit unknowns, and review-ready engineering reports.",
+    cta: "Choose your assistant",
   },
   whyItMatters: {
-    title: "A diff shows what changed. Decisions need what it means.",
+    title: "A diff shows changes. Reviewers still need the impact.",
     description:
-      "Give reviewers a compact narrative of impact, compatibility, and release risk while the evidence is still close at hand.",
+      "Engineering Power separates observed facts, reasoned inferences, and unanswered questions. It also distinguishes checks that ran from tests it found or recommends.",
   },
   flow: {
-    eyebrow: "Connected decision flow",
-    title: "One evidence trail, from comparison to decision.",
+    eyebrow: "One evidence snapshot",
+    title: "Analyze once. Reuse the evidence.",
   },
   outputs: {
-    eyebrow: "Decision-ready outputs",
-    title: "The questions a release review needs answered.",
+    eyebrow: "Cited review inputs",
+    title: "Useful reports without false certainty.",
   },
   demo: {
     title: "See the evidence in report form.",
@@ -235,7 +235,7 @@ export const siteCopy = {
   },
   trust: {
     eyebrow: "Trust boundary",
-    title: "Useful analysis without pretending certainty.",
+    title: "Evidence has clear limits.",
   },
   footer: {
     githubLabel: "View Engineering Power on GitHub",

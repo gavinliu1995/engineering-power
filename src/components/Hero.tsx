@@ -18,10 +18,14 @@ export function Hero() {
           <p className="eyebrow">{siteCopy.hero.eyebrow}</p>
           <h1 id="hero-title">{siteCopy.hero.title}</h1>
           <p className="hero-copy">{siteCopy.hero.description}</p>
-          <Link className="button button-primary hero-cta" to="/start">
-            <span>{siteCopy.hero.cta}</span>
-            <span aria-hidden="true">→</span>
-          </Link>
+          <div className="hero-actions">
+            <Link className="button button-primary hero-cta" to="/start">
+              {siteCopy.hero.cta}
+            </Link>
+            <Link className="hero-secondary-link" to="/demo-report">
+              View sample report
+            </Link>
+          </div>
         </motion.div>
         <IntelligenceFlowField reducedMotion={reducedMotion} />
       </div>

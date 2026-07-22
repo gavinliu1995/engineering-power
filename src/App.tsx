@@ -1,4 +1,5 @@
-import { Link, Route, Routes } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { Link, Route, Routes, useLocation } from "react-router-dom";
 import { EvidenceFlow } from "./components/EvidenceFlow";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
@@ -10,6 +11,26 @@ import { ReleaseDecision } from "./components/ReleaseDecision";
 import { ReportHeader } from "./components/ReportHeader";
 import { ValidationMatrix } from "./components/ValidationMatrix";
 import { homepageEvidenceStates, reportData, siteCopy } from "./content/siteContent";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  const previousPath = useRef(pathname);
+
+  useEffect(() => {
+    const pathChanged = previousPath.current !== pathname;
+    window.scrollTo(0, 0);
+
+    if (pathChanged) {
+      const heading = document.querySelector<HTMLElement>("main h1");
+      heading?.setAttribute("tabindex", "-1");
+      heading?.focus({ preventScroll: true });
+    }
+
+    previousPath.current = pathname;
+  }, [pathname]);
+
+  return null;
+}
 
 function HomePage() {
   return (
@@ -76,59 +97,198 @@ function DemoReportPage() {
 }
 
 function QuickStartPage() {
+  const hosts = [
+    {
+      id: "codex",
+      name: "Codex",
+      description: "Local developer preview for a configured personal marketplace.",
+    },
+    {
+      id: "copilot",
+      name: "GitHub Copilot",
+      description: "Install the portable project skill for Copilot CLI or VS Code.",
+    },
+    {
+      id: "claude",
+      name: "Claude Code",
+      description: "Install Engineering Power as a Claude Code project skill.",
+    },
+    {
+      id: "cursor",
+      name: "Cursor",
+      description: "Install Engineering Power as a Cursor project skill.",
+    },
+  ] as const;
+
   return (
     <main className="quick-start-page">
-      <p className="eyebrow">Quick start</p>
-      <h1>Choose where you use Engineering Power.</h1>
-      <p className="quick-start-intro">Select your assistant to see the right installation path. Engineering Power stays focused on cited, decision-ready engineering work.</p>
-      <div className="assistant-choice-grid">
-        <Link className="assistant-choice assistant-choice-codex" to="/start/codex" aria-label="Use Engineering Power with Codex">
-          <span className="guide-step">Option 01</span>
-          <h2>Codex</h2>
-          <p>Use the Engineering Power plugin inside a Codex task.</p>
-          <span className="choice-action">Use Engineering Power with Codex <span aria-hidden="true">→</span></span>
-        </Link>
-        <Link className="assistant-choice assistant-choice-copilot" to="/start/copilot" aria-label="Use Engineering Power with GitHub Copilot">
-          <span className="guide-step">Option 02</span>
-          <h2>GitHub Copilot</h2>
-          <p>Install the portable Engineering Power skill in your project.</p>
-          <span className="choice-action">Use Engineering Power with GitHub Copilot <span aria-hidden="true">→</span></span>
-        </Link>
-      </div>
+      <p className="eyebrow">Choose a host</p>
+      <h1>Use Engineering Power with your coding assistant.</h1>
+      <p className="quick-start-intro">Pick your assistant for installation and a first evidence-backed analysis. Engineering Power is read-only by default and does not merge, deploy, or change the target repository.</p>
+      <nav className="assistant-choice-grid" aria-label="Supported coding assistants">
+        {hosts.map((host, index) => (
+          <Link
+            key={host.id}
+            className={`assistant-choice assistant-choice-${host.id}`}
+            to={`/start/${host.id}`}
+            aria-label={`Use Engineering Power with ${host.name}`}
+          >
+            <span className="guide-step">Option {String(index + 1).padStart(2, "0")}</span>
+            <h2>{host.name}</h2>
+            <p>{host.description}</p>
+            <span className="choice-action">Open {host.name} guide</span>
+          </Link>
+        ))}
+      </nav>
     </main>
   );
 }
 
-function HostGuidePage({ host }: { host: "codex" | "copilot" }) {
-  const isCodex = host === "codex";
-  const heading = isCodex ? "Use Engineering Power in Codex." : "Use Engineering Power in GitHub Copilot.";
+type HostId = "codex" | "copilot" | "claude" | "cursor";
+
+type GuideStep = {
+  title: string;
+  description: string;
+  code?: readonly string[];
+};
+
+const portableSourceStep: GuideStep = {
+  title: "Get Engineering Power",
+  description: "Clone the canonical repository, then run the installer from that checkout.",
+  code: [
+    "git clone https://github.com/gavinliu1995/engineering-power.git",
+    "cd engineering-power",
+  ],
+};
+
+const hostGuides: Record<HostId, {
+  eyebrow: string;
+  heading: string;
+  intro: string;
+  steps: readonly GuideStep[];
+}> = {
+  codex: {
+    eyebrow: "Local developer preview",
+    heading: "Use Engineering Power in Codex.",
+    intro: "This is not a public Codex install. The documented path is for developers whose personal marketplace already points to a local Engineering Power checkout; everyone else can use one of the portable project-skill hosts.",
+    steps: [
+      {
+        title: "Refresh the local plugin snapshot",
+        description: "The maintainer setup expects the canonical checkout at this path and a configured personal Codex plugin source.",
+        code: [
+          'PLUGIN_ROOT="$HOME/Documents/engineering-power"',
+          'python3 "$HOME/.codex/skills/.system/plugin-creator/scripts/update_plugin_cachebuster.py" "$PLUGIN_ROOT"',
+        ],
+      },
+      {
+        title: "Add the configured plugin",
+        description: "Continue only when the personal marketplace entry already points to that checkout.",
+        code: ["codex plugin add engineering-power@personal"],
+      },
+      {
+        title: "Start a new task",
+        description: "Start a new task and describe the repository or pull request you want Engineering Power to analyze.",
+      },
+      {
+        title: "Ask a concrete question",
+        description: "Request an evidence-backed answer with facts, inferences, unknowns, and file citations.",
+        code: ["Analyze this pull request with Engineering Power. Separate facts, inferences, and unknowns, with citations."],
+      },
+    ],
+  },
+  copilot: {
+    eyebrow: "Portable project skill",
+    heading: "Use Engineering Power in GitHub Copilot.",
+    intro: "Add Engineering Power as a project skill for GitHub Copilot CLI or the VS Code coding agent.",
+    steps: [
+      portableSourceStep,
+      {
+        title: "Install into your project",
+        description: "Run the installer from the Engineering Power repository with your project as the target.",
+        code: ["python3 scripts/install_agent_skill.py --host copilot --target-root /path/to/project"],
+      },
+      {
+        title: "Reload and verify",
+        description: "Reload Copilot skills and confirm Engineering Power is available.",
+        code: ["/skills reload", "/skills info engineering-power"],
+      },
+      {
+        title: "Start an analysis",
+        description: "Invoke Engineering Power, then provide a repository, pull request, local comparison, working tree, or patch.",
+        code: ["/engineering-power"],
+      },
+    ],
+  },
+  claude: {
+    eyebrow: "Portable project skill",
+    heading: "Use Engineering Power in Claude Code.",
+    intro: "Install Engineering Power into your project, then ask Claude Code to analyze a repository or code change with cited evidence.",
+    steps: [
+      portableSourceStep,
+      {
+        title: "Install into your project",
+        description: "Run the installer from the Engineering Power repository.",
+        code: ["python3 scripts/install_agent_skill.py --host claude --target-root /path/to/project"],
+      },
+      {
+        title: "Confirm the skill file",
+        description: "The installed skill should exist at this documented project path.",
+        code: ["/path/to/project/.claude/skills/engineering-power"],
+      },
+      {
+        title: "Start an analysis",
+        description: "Ask Claude Code to use Engineering Power with a repository, comparison, working tree, or patch.",
+        code: ["Use the engineering-power skill to analyze this repository."],
+      },
+    ],
+  },
+  cursor: {
+    eyebrow: "Portable project skill",
+    heading: "Use Engineering Power in Cursor.",
+    intro: "Install Engineering Power as a Cursor project skill, then give it a repository or change target to analyze.",
+    steps: [
+      portableSourceStep,
+      {
+        title: "Install into your project",
+        description: "Run the installer from the Engineering Power repository.",
+        code: ["python3 scripts/install_agent_skill.py --host cursor --target-root /path/to/project"],
+      },
+      {
+        title: "Confirm the skill file",
+        description: "The installed skill should exist at this documented project path.",
+        code: ["/path/to/project/.cursor/skills/engineering-power"],
+      },
+      {
+        title: "Start an analysis",
+        description: "Ask Cursor to use Engineering Power with a repository or change target.",
+        code: ["Use the engineering-power skill to analyze this repository."],
+      },
+    ],
+  },
+};
+
+function HostGuidePage({ host }: { host: HostId }) {
+  const guide = hostGuides[host];
 
   return (
     <main className="quick-start-page host-guide-page">
-      <Link className="back-link" to="/start">← Choose another assistant</Link>
-      <p className="eyebrow">{isCodex ? "Codex plugin" : "Portable agent skill"}</p>
-      <h1>{heading}</h1>
-      <p className="quick-start-intro">
-        {isCodex
-          ? "Install the Engineering Power plugin, then describe the repository or pull request you want to understand."
-          : "Install Engineering Power into the project where GitHub Copilot works, then reload and verify the skill."}
-      </p>
+      <Link className="back-link" to="/start">Choose another assistant</Link>
+      <p className="eyebrow">{guide.eyebrow}</p>
+      <h1>{guide.heading}</h1>
+      <p className="quick-start-intro">{guide.intro}</p>
       <ol className="host-guide-steps">
-        {isCodex ? (
-          <>
-            <li><span>01</span><div><h2>Install the plugin</h2><p>Install Engineering Power from your Codex plugin marketplace.</p></div></li>
-            <li><span>02</span><div><h2>Start a task</h2><p>Start a new task and describe the repository or pull request you want Engineering Power to analyze.</p></div></li>
-            <li><span>03</span><div><h2>Ask for the decision you need</h2><p>Request an evidence-backed answer with facts, inferences, unknowns, and file citations.</p><code>Analyze this pull request with Engineering Power. Separate facts, inferences, and unknowns, with citations.</code></div></li>
-          </>
-        ) : (
-          <>
-            <li><span>01</span><div><h2>Install into your project</h2><p>Run the installer from the Engineering Power repository with your project as the target.</p><code>python3 scripts/install_agent_skill.py --host copilot --target-root /path/to/project</code></div></li>
-            <li><span>02</span><div><h2>Reload and verify</h2><p>In GitHub Copilot, reload skills and confirm Engineering Power is available.</p><code>/skills reload</code><code>/skills info engineering-power</code></div></li>
-            <li><span>03</span><div><h2>Invoke Engineering Power</h2><p>Use <code>/engineering-power</code> when slash invocation is available, then provide a repository, pull request, or local comparison.</p></div></li>
-          </>
-        )}
+        {guide.steps.map((step, index) => (
+          <li key={step.title}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <div>
+              <h2>{step.title}</h2>
+              <p>{step.description}</p>
+              {step.code?.map((line) => <code key={line}>{line}</code>)}
+            </div>
+          </li>
+        ))}
       </ol>
-      <a className="button button-primary" href="https://github.com/gavinliu1995/engineering-power" target="_blank" rel="noreferrer">View installation files on GitHub</a>
+      <a className="button button-primary" href="https://github.com/gavinliu1995/engineering-power" target="_blank" rel="noreferrer">Open the canonical repository</a>
     </main>
   );
 }
@@ -147,13 +307,18 @@ function NotFoundPage() {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/demo-report" element={<DemoReportPage />} />
-      <Route path="/start" element={<QuickStartPage />} />
-      <Route path="/start/codex" element={<HostGuidePage host="codex" />} />
-      <Route path="/start/copilot" element={<HostGuidePage host="copilot" />} />
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/demo-report" element={<DemoReportPage />} />
+        <Route path="/start" element={<QuickStartPage />} />
+        <Route path="/start/codex" element={<HostGuidePage host="codex" />} />
+        <Route path="/start/copilot" element={<HostGuidePage host="copilot" />} />
+        <Route path="/start/claude" element={<HostGuidePage host="claude" />} />
+        <Route path="/start/cursor" element={<HostGuidePage host="cursor" />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </>
   );
 }
