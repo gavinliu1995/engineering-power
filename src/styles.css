@@ -273,3 +273,149 @@ h1,h2,h3 { color: #171814; letter-spacing: -.06em; } p { color: var(--text-muted
   .site-header { width:min(100% - 2rem,76rem); }
   .hero h1 { white-space:normal; text-wrap:balance; }
 }
+
+/* Intelligence Flow Field — selected Product Design direction. */
+.home-header-shell {
+  position: relative;
+  z-index: 10;
+  border-bottom: 1px solid rgba(255, 255, 255, .09);
+  background: #08090a;
+}
+.home-header-shell .site-header {
+  width: calc(100% - 7rem);
+  max-width: none;
+  min-height: 5.25rem;
+  color: #f5f6f1;
+}
+.home-header-shell .header-link { color: #b9bcb4; }
+.home-header-shell .header-link:hover { color: #fff; }
+.home-header-shell .brand-mark {
+  width: 1.9rem;
+  height: 1.9rem;
+  background: #c9ff43;
+  box-shadow: 0 0 24px rgba(201, 255, 67, .16);
+}
+.hero {
+  position: relative;
+  display: block;
+  min-height: calc(100svh - 5.25rem);
+  overflow: hidden;
+  color: #f6f7f3;
+  background: #08090a;
+  background-image: none;
+  animation: none;
+  isolation: isolate;
+}
+.hero::before { display: none; }
+.hero-layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 47rem) minmax(0, 1fr);
+  align-items: center;
+  justify-items: stretch;
+  width: calc(100% - 7rem);
+  max-width: none;
+  min-height: inherit;
+  margin: 0 auto;
+  text-align: left;
+}
+.hero-content {
+  position: relative;
+  z-index: 3;
+  max-width: 43rem;
+  padding: 4rem 0 12rem 1rem;
+}
+.hero .eyebrow {
+  margin-bottom: 1.4rem;
+  color: #c9ff43;
+  font-size: .72rem;
+  letter-spacing: .15em;
+}
+.hero h1 {
+  max-width: 38rem;
+  margin: 0 0 1.8rem;
+  color: #f7f8f4;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: clamp(4rem, 4.8vw, 5.35rem);
+  font-weight: 520;
+  line-height: .93;
+  letter-spacing: -.065em;
+  white-space: normal;
+  text-wrap: pretty;
+}
+.hero-copy {
+  max-width: 34rem;
+  margin-inline: 0;
+  margin-bottom: 2.25rem;
+  color: #aeb2aa !important;
+  font-size: 1.08rem;
+  line-height: 1.58;
+}
+.hero-cta {
+  min-height: 3.35rem;
+  gap: 2.7rem;
+  min-width: 12.4rem;
+  padding-inline: 1.55rem;
+  border-radius: .62rem;
+  box-shadow: 0 0 0 1px rgba(201, 255, 67, .28), 0 0 36px rgba(201, 255, 67, .14);
+}
+.intelligence-flow-field {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.intelligence-flow-field::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(8, 9, 10, .98) 0%, rgba(8, 9, 10, .72) 29%, rgba(8, 9, 10, .12) 58%, rgba(8, 9, 10, .04) 100%);
+  pointer-events: none;
+}
+.intelligence-flow-field canvas {
+  width: 100% !important;
+  height: 100% !important;
+  filter: saturate(.88) contrast(1.08);
+}
+.intelligence-flow-field > div,
+.intelligence-flow-field canvas {
+  pointer-events: auto;
+}
+.intelligence-flow-field > div { touch-action: pan-y; }
+.intelligence-flow-fallback {
+  position: absolute;
+  inset: 0;
+}
+
+@media (max-width: 900px) {
+  .home-header-shell .site-header { width: min(100% - 2rem, 90rem); }
+  .hero { min-height: 45rem; }
+  .hero-layout {
+    grid-template-columns: 1fr;
+    width: min(100% - 2rem, 90rem);
+  }
+  .hero-content {
+    max-width: 37rem;
+    padding: 6rem 0 13rem;
+  }
+  .hero h1 { max-width: 36rem; font-size: clamp(3.5rem, 12vw, 5.8rem); }
+  .intelligence-flow-field { transform: translate3d(10%, 16%, 0) scale(1.12); }
+  .intelligence-flow-field::after {
+    background: linear-gradient(180deg, rgba(8, 9, 10, .9) 0%, rgba(8, 9, 10, .58) 48%, rgba(8, 9, 10, .05) 100%);
+  }
+}
+
+@media (max-width: 560px) {
+  .home-header-shell .site-header { min-height: 4.7rem; }
+  .hero { min-height: 43rem; }
+  .hero-content { padding: 4.6rem 0 12rem; }
+  .hero h1 { font-size: clamp(3.15rem, 15.5vw, 4.55rem); line-height: .95; }
+  .hero-copy { max-width: 29rem; font-size: 1rem; }
+  .intelligence-flow-field { transform: translate3d(12%, 24%, 0) scale(1.18); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intelligence-flow-field { transform: none; }
+}

@@ -14,7 +14,9 @@ import { homepageEvidenceStates, reportData, siteCopy } from "./content/siteCont
 function HomePage() {
   return (
     <div className="page-shell" id="top">
-      <Header />
+      <div className="home-header-shell">
+        <Header />
+      </div>
       <main>
         <Hero />
         <section className="why-section" aria-labelledby="why-title">

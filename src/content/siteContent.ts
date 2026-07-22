@@ -202,11 +202,11 @@ export const trustBoundaries: TrustBoundary[] = [
 export const siteCopy = {
   brand: "Engineering Power",
   hero: {
-    eyebrow: "Evidence-backed engineering intelligence",
-    title: "Evidence-backed engineering decisions.",
+    eyebrow: "AI-native developer platform",
+    title: "Engineering moves at the speed of intelligence.",
     description:
-      "Engineering Power turns a pull request or local comparison into cited, decision-ready engineering outputs.",
-    cta: "View Demo Report",
+      "Unify agents, reusable skills, repository context, and delivery in one evidence-backed engineering workflow.",
+    cta: "Get started",
   },
   whyItMatters: {
     title: "A diff shows what changed. Decisions need what it means.",

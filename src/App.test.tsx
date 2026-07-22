@@ -11,7 +11,7 @@ test("renders the product headline on the home route", () => {
 
   expect(
     screen.getByRole("heading", {
-      name: /evidence-backed engineering decisions/i,
+      name: /engineering moves at the speed of intelligence/i,
     }),
   ).toBeInTheDocument();
 
@@ -25,7 +25,7 @@ test("connects the hero CTA to the quick-start guide", () => {
   );
 
   const hero = screen.getByRole("region", {
-    name: "Evidence-backed engineering decisions.",
+    name: "Engineering moves at the speed of intelligence.",
   });
 
   expect(
@@ -234,16 +234,17 @@ test("keeps the demo preview call to action available from the home page", () =>
   expect(screen.getByRole("link", { name: "View Demo Report" })).toHaveAttribute("href", "/demo-report");
 });
 
-test("keeps the animated evidence signal decorative and exposes its release state", () => {
+test("keeps the intelligence flow field decorative", () => {
   render(
     <MemoryRouter initialEntries={["/"]}>
       <App />
     </MemoryRouter>,
   );
 
-  const signal = screen.getByTestId("evidence-signal-field");
-  expect(signal).toHaveAttribute("aria-hidden", "true");
-  expect(signal).toHaveTextContent("PROCEED WITH CONDITIONS");
+  const field = screen.getByTestId("intelligence-flow-field");
+  expect(field).toHaveAttribute("aria-hidden", "true");
+  expect(field).not.toHaveTextContent("PROCEED WITH CONDITIONS");
+  expect(screen.getByTestId("intelligence-flow-fallback")).toBeInTheDocument();
 });
 
 test("renders the not-found page for an unmatched route", () => {
