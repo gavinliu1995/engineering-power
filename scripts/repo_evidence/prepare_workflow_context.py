@@ -7,8 +7,9 @@ from pathlib import Path
 import re
 
 from cache_permissions import secure_file
+from redact_context import redact_lines
 
-WORKFLOW_CONTEXT_VERSION = 2
+WORKFLOW_CONTEXT_VERSION = 3
 
 WORKFLOW_PROFILES = {
     "dependency-impact": {
@@ -93,10 +94,6 @@ SENSITIVE_PATH = re.compile(
     r"(^|/)(\.env($|\.)|id_rsa|id_ed25519|credentials?|secrets?)(/|$)|"
     r"\.(pem|p12|pfx|key)$",
     re.IGNORECASE,
-)
-SENSITIVE_ASSIGNMENT = re.compile(
-    r"(?i)(password|passwd|secret|token|api[_-]?key|private[_-]?key)"
-    r"(\s*[=:]\s*)([^\s,;]+)"
 )
 
 
@@ -232,16 +229,12 @@ def resolve_evidence_file(files_root, relative_path):
     return candidate
 
 
-def redact_line(line):
-    return SENSITIVE_ASSIGNMENT.sub(r"\1\2[REDACTED]", line)
-
-
 def render_evidence(path, content, terms, max_lines):
-    lines = content.splitlines()
+    lines = redact_lines(content.splitlines())
     sections = []
     for start, end in citation_windows(lines, terms, max_lines):
         rendered = "\n".join(
-            f"{number:>6} | {redact_line(lines[number - 1])}"
+            f"{number:>6} | {lines[number - 1]}"
             for number in range(start, end + 1)
         )
         sections.extend(

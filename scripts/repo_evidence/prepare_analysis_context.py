@@ -10,9 +10,10 @@ import time
 
 from cache_permissions import secure_file
 from collect_github_context import LAYER_ORDER, progress, select_candidates
+from redact_context import redact_lines
 
 
-CONTEXT_POLICY_VERSION = 5
+CONTEXT_POLICY_VERSION = 6
 
 CONTEXT_DEFAULTS = {
     "quick": {
@@ -300,6 +301,7 @@ def build_context(snapshot, profile, output, deadline_seconds):
             ).splitlines()
         except OSError:
             continue
+        source_lines = redact_lines(source_lines)
         windows = excerpt_windows(source_lines, defaults["max_lines_per_file"])
         if not windows:
             continue

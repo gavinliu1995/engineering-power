@@ -221,6 +221,29 @@ class WorkflowContextTests(unittest.TestCase):
                 self.snapshot, "unknown", "quick", self.snapshot / "unknown.md"
             )
 
+    def test_workflow_context_redacts_secret_values_before_rendering(self):
+        synthetic_secret = "workflow-context-dummy-secret"
+        self.write_snapshot(
+            [
+                (
+                    "src/OrderController.java",
+                    '@GetMapping("/orders")\n'
+                    f'<server password="{synthetic_secret}" />\n'
+                    "OrderDto list() {}\n",
+                    True,
+                )
+            ]
+        )
+
+        result = build_workflow_context(
+            self.snapshot, "api-contract", "quick", self.snapshot / "api.md"
+        )
+        context = Path(result["context"]).read_text(encoding="utf-8")
+
+        self.assertNotIn(synthetic_secret, context)
+        self.assertIn('password="[REDACTED]"', context)
+        self.assertIn("     3 | OrderDto list() {}", context)
+
 
 if __name__ == "__main__":
     unittest.main()

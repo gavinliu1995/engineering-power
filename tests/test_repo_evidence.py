@@ -21,6 +21,7 @@ import collect_local_context as local_collector  # noqa: E402
 import finalize_report  # noqa: E402
 import manage_cache  # noqa: E402
 import prepare_analysis_context  # noqa: E402
+import redact_context  # noqa: E402
 import validate_report  # noqa: E402
 
 
@@ -407,6 +408,60 @@ class LocalCollectionTests(unittest.TestCase):
             self.assertLessEqual(
                 len(context), prepare_analysis_context.CONTEXT_DEFAULTS["quick"]["max_chars"]
             )
+
+    def test_shared_redactor_covers_supported_secret_shapes_and_preserves_lines(self):
+        synthetic_secret = "synthetic-secret-value"
+        source = "\n".join(
+            [
+                f"password={synthetic_secret}",
+                f'TOKEN: "{synthetic_secret}"',
+                f'{{"apiKey": "{synthetic_secret}"}}',
+                f"<password>{synthetic_secret}</password>",
+                f'<server password="{synthetic_secret}" />',
+                f"tool --token {synthetic_secret} --mode safe",
+                f"tool --password={synthetic_secret}",
+                f"Authorization: Bearer {synthetic_secret}",
+                f"Authorization: Basic {synthetic_secret}",
+                f"https://user:{synthetic_secret}@example.test/path",
+                "-----BEGIN PRIVATE KEY-----",
+                synthetic_secret,
+                "-----END PRIVATE KEY-----",
+                f'<user username="demo" password="{synthetic_secret}" roles="reader" />',
+            ]
+        )
+
+        redacted = redact_context.redact_text(source)
+
+        self.assertNotIn(synthetic_secret, redacted)
+        self.assertGreaterEqual(redacted.count("[REDACTED]"), 10)
+        self.assertEqual(len(source.splitlines()), len(redacted.splitlines()))
+        self.assertIn("-----BEGIN PRIVATE KEY-----", redacted)
+        self.assertIn("-----END PRIVATE KEY-----", redacted)
+
+    def test_analysis_context_redacts_before_rendering_numbered_evidence(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, _, _ = self.create_repository(root)
+            synthetic_secret = "analysis-context-dummy-secret"
+            (repository / "app.py").write_text(
+                f'password = "{synthetic_secret}"\nvalue = 1\n',
+                encoding="utf-8",
+            )
+            self.git(repository, "add", "app.py")
+            self.git(repository, "commit", "-m", "add synthetic credential fixture")
+            snapshot, _ = local_collector.collect(
+                self.args(repository, root / "snapshot")
+            )
+            output = snapshot / "analysis-context-quick.md"
+
+            prepare_analysis_context.build_context(
+                snapshot, "quick", output, deadline_seconds=20
+            )
+            context = output.read_text(encoding="utf-8")
+
+            self.assertNotIn(synthetic_secret, context)
+            self.assertIn('password = "[REDACTED]"', context)
+            self.assertIn("     2 | value = 1", context)
 
     def test_analysis_context_discloses_layers_with_no_candidates(self):
         with tempfile.TemporaryDirectory() as temporary:
