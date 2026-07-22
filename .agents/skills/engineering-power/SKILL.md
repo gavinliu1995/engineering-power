@@ -5,8 +5,10 @@ description: Run evidence-backed repository intelligence, PR impact, architectur
 
 # Engineering Power
 
-Use this Skill to make engineering conclusions traceable to a specific Git
-state and source evidence. Default to read-only analysis. Do not checkout,
+Use this router/orchestrator Agent Skill to select an Engineering Power
+workflow while keeping every material conclusion traceable to a specific Git
+state and source evidence. Keep workflow detail in the linked references rather
+than expanding this entry point. Default to read-only analysis. Do not checkout,
 reset, apply a patch, commit, or modify the target repository unless the user
 explicitly requests an implementation workflow and authorizes writes.
 
@@ -67,8 +69,39 @@ repository state, cache status, coverage limits, and authentication method.
 - **GitHub cloud agents:** Use for GitHub repositories and PRs only. They cannot
   access a developer's local checkout or a company VPN/Bitbucket environment.
 
+## Resources
+
+Load only the resources required for the selected workflow:
+
+- [Report schema](references/report-schema.md): evidence rules, exact formal
+  report headings, diagrams, risk, confidence, and runtime metadata.
+- [Local analysis](references/local-analysis.md): local repository, Git range,
+  working-tree, downloaded patch, and offline Bitbucket rules.
+- [Pull request analysis](references/pull-request-analysis.md): change
+  propagation, test impact, diagrams, and regression-risk analysis.
+
 ## Report contract
 
 Include the target, exact commit or base/head state, profile, cache status,
 collection coverage, citations, and the validation result. Never claim that a
 test passed unless this session ran it and observed a successful result.
+
+Use the following minimum structure for a generic workflow. When a linked
+workflow schema defines exact headings, that schema takes precedence; preserve
+the same information in its metadata and sections.
+
+```markdown
+## Target
+
+## Git state
+
+## Evidence coverage
+
+## Findings
+
+## Risks
+
+## Validation
+
+## Unknowns
+```

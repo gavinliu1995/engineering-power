@@ -30,6 +30,27 @@ class CrossPlatformSkillTests(unittest.TestCase):
         ):
             self.assertIn(workflow, content)
 
+    def test_portable_skill_documents_router_resources_and_report_template(self):
+        content = (PORTABLE_SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("router/orchestrator", content.lower())
+        for resource in (
+            "[Report schema](references/report-schema.md)",
+            "[Local analysis](references/local-analysis.md)",
+            "[Pull request analysis](references/pull-request-analysis.md)",
+        ):
+            self.assertIn(resource, content)
+        for section in (
+            "## Target",
+            "## Git state",
+            "## Evidence coverage",
+            "## Findings",
+            "## Risks",
+            "## Validation",
+            "## Unknowns",
+        ):
+            self.assertIn(section, content)
+
     def test_portable_skill_is_self_contained_for_gh_skill_install(self):
         self.assertTrue(
             (PORTABLE_SKILL / "scripts" / "repo_evidence" / "collect_local_context.py").is_file()
@@ -114,6 +135,16 @@ class CrossPlatformSkillTests(unittest.TestCase):
             "Bitbucket",
             "install_agent_skill.py",
             "sync_portable_agent_skill.py",
+        ):
+            self.assertIn(expected, content)
+
+    def test_readme_documents_team_release_governance(self):
+        content = (ROOT / "README.md").read_text(encoding="utf-8")
+        for expected in (
+            "## Ownership and release governance",
+            "Owner:",
+            "Review cadence:",
+            "Release checklist:",
         ):
             self.assertIn(expected, content)
 

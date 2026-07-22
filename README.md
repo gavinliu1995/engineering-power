@@ -203,6 +203,25 @@ The automated suite covers plugin layout, local and GitHub evidence behavior,
 cache reuse and permissions, deadlines, report validation, workflow-specific
 context selection, and specialized report contracts.
 
+## Ownership and release governance
+
+- **Owner:** Gavin Liu. The owner approves scope, release readiness, and changes
+  to the evidence or safety contracts.
+- **Maintainer responsibilities:** keep the portable Agent Skill synchronized,
+  review host compatibility, triage defects, and ensure reports remain
+  evidence-backed and read-only by default.
+- **Review cadence:** review quarterly, before each team release, and after a
+  material GitHub Copilot, Claude Code, Cursor, or Codex skill-format change.
+- **Release checklist:**
+  1. Run `python3 scripts/sync_portable_agent_skill.py --check`.
+  2. Run the full deterministic test suite and both Skill and Plugin validators.
+  3. Install the portable package in a clean target and run a local-repository
+     and change-analysis smoke test.
+  4. Confirm no credentials, private keys, source snapshots, or local worktree
+     payloads are tracked.
+  5. Record known limitations and require human review before expanding write
+     permissions or team rollout.
+
 ## Architecture
 
 ```text
