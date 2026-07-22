@@ -69,6 +69,17 @@ test("lets users choose every supported coding assistant from the quick-start ro
   expect(screen.queryByText("$repo-intelligence /path/to/repository")).not.toBeInTheDocument();
 });
 
+test.each(["/start", "/start/codex"])(
+  "offers a visible route back to the home page from %s",
+  (route) => {
+    render(<MemoryRouter initialEntries={[route]}><App /></MemoryRouter>);
+
+    expect(
+      screen.getByRole("link", { name: "Engineering Power home" }),
+    ).toHaveAttribute("href", "/");
+  },
+);
+
 test("uses product-facing Codex guidance instead of an internal workflow name", () => {
   render(<MemoryRouter initialEntries={["/start/codex"]}><App /></MemoryRouter>);
   expect(screen.getByRole("heading", { name: /use engineering power in codex/i })).toBeInTheDocument();

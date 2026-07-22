@@ -1,9 +1,13 @@
 import { siteCopy } from "../content/siteContent";
 
-export function Header() {
+type HeaderProps = {
+  homeHref?: string;
+};
+
+export function Header({ homeHref = "#top" }: HeaderProps) {
   return (
     <header className="site-header">
-      <a className="brand" href="#top" aria-label={`${siteCopy.brand} home`}>
+      <a className="brand" href={homeHref} aria-label={`${siteCopy.brand} home`}>
         <img
           className="brand-mark"
           src="/images/engineering-power-citation-frame-header.png"

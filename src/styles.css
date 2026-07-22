@@ -288,6 +288,22 @@ h1,h2,h3 { color: #171814; letter-spacing: -.06em; } p { color: var(--text-muted
   color: #f5f6f1;
 }
 .home-header-shell .header-link { color: #b9bcb4; }
+
+.onboarding-page-shell {
+  min-height: 100vh;
+  background: #f7f7f2;
+}
+.onboarding-header-shell {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  border-bottom: 1px solid rgba(20, 21, 22, .1);
+  background: rgba(247, 247, 242, .92);
+  backdrop-filter: blur(16px);
+}
+.onboarding-header-shell .site-header {
+  min-height: 5.25rem;
+}
 .home-header-shell .header-link:hover { color: #fff; }
 .home-header-shell .brand-mark {
   width: 1.9rem;

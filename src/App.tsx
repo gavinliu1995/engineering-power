@@ -96,6 +96,14 @@ function DemoReportPage() {
   );
 }
 
+function OnboardingHeader() {
+  return (
+    <div className="onboarding-header-shell">
+      <Header homeHref="/" />
+    </div>
+  );
+}
+
 function QuickStartPage() {
   const hosts = [
     {
@@ -121,26 +129,29 @@ function QuickStartPage() {
   ] as const;
 
   return (
-    <main className="quick-start-page">
-      <p className="eyebrow">Choose a host</p>
-      <h1>Use Engineering Power with your coding assistant.</h1>
-      <p className="quick-start-intro">Pick your assistant for installation and a first evidence-backed analysis. Engineering Power is read-only by default and does not merge, deploy, or change the target repository.</p>
-      <nav className="assistant-choice-grid" aria-label="Supported coding assistants">
-        {hosts.map((host, index) => (
-          <Link
-            key={host.id}
-            className={`assistant-choice assistant-choice-${host.id}`}
-            to={`/start/${host.id}`}
-            aria-label={`Use Engineering Power with ${host.name}`}
-          >
-            <span className="guide-step">Option {String(index + 1).padStart(2, "0")}</span>
-            <h2>{host.name}</h2>
-            <p>{host.description}</p>
-            <span className="choice-action">Open {host.name} guide</span>
-          </Link>
-        ))}
-      </nav>
-    </main>
+    <div className="onboarding-page-shell" id="top">
+      <OnboardingHeader />
+      <main className="quick-start-page">
+        <p className="eyebrow">Choose a host</p>
+        <h1>Use Engineering Power with your coding assistant.</h1>
+        <p className="quick-start-intro">Pick your assistant for installation and a first evidence-backed analysis. Engineering Power is read-only by default and does not merge, deploy, or change the target repository.</p>
+        <nav className="assistant-choice-grid" aria-label="Supported coding assistants">
+          {hosts.map((host, index) => (
+            <Link
+              key={host.id}
+              className={`assistant-choice assistant-choice-${host.id}`}
+              to={`/start/${host.id}`}
+              aria-label={`Use Engineering Power with ${host.name}`}
+            >
+              <span className="guide-step">Option {String(index + 1).padStart(2, "0")}</span>
+              <h2>{host.name}</h2>
+              <p>{host.description}</p>
+              <span className="choice-action">Open {host.name} guide</span>
+            </Link>
+          ))}
+        </nav>
+      </main>
+    </div>
   );
 }
 
@@ -271,25 +282,28 @@ function HostGuidePage({ host }: { host: HostId }) {
   const guide = hostGuides[host];
 
   return (
-    <main className="quick-start-page host-guide-page">
-      <Link className="back-link" to="/start">Choose another assistant</Link>
-      <p className="eyebrow">{guide.eyebrow}</p>
-      <h1>{guide.heading}</h1>
-      <p className="quick-start-intro">{guide.intro}</p>
-      <ol className="host-guide-steps">
-        {guide.steps.map((step, index) => (
-          <li key={step.title}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <div>
-              <h2>{step.title}</h2>
-              <p>{step.description}</p>
-              {step.code?.map((line) => <code key={line}>{line}</code>)}
-            </div>
-          </li>
-        ))}
-      </ol>
-      <a className="button button-primary" href="https://github.com/gavinliu1995/engineering-power" target="_blank" rel="noreferrer">Open the canonical repository</a>
-    </main>
+    <div className="onboarding-page-shell" id="top">
+      <OnboardingHeader />
+      <main className="quick-start-page host-guide-page">
+        <Link className="back-link" to="/start">Choose another assistant</Link>
+        <p className="eyebrow">{guide.eyebrow}</p>
+        <h1>{guide.heading}</h1>
+        <p className="quick-start-intro">{guide.intro}</p>
+        <ol className="host-guide-steps">
+          {guide.steps.map((step, index) => (
+            <li key={step.title}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <div>
+                <h2>{step.title}</h2>
+                <p>{step.description}</p>
+                {step.code?.map((line) => <code key={line}>{line}</code>)}
+              </div>
+            </li>
+          ))}
+        </ol>
+        <a className="button button-primary" href="https://github.com/gavinliu1995/engineering-power" target="_blank" rel="noreferrer">Open the canonical repository</a>
+      </main>
+    </div>
   );
 }
 
