@@ -17,7 +17,7 @@ test("renders the product headline on the home route", () => {
 
 });
 
-test("connects the hero CTA to the static demo report", () => {
+test("connects the hero CTA to the quick-start guide", () => {
   render(
     <MemoryRouter initialEntries={["/"]}>
       <App />
@@ -29,8 +29,15 @@ test("connects the hero CTA to the static demo report", () => {
   });
 
   expect(
-    within(hero).getByRole("link", { name: "View Demo Report" }),
-  ).toHaveAttribute("href", "/demo-report");
+    within(hero).getByRole("link", { name: "Get started" }),
+  ).toHaveAttribute("href", "/start");
+});
+
+test("guides Codex and GitHub Copilot users from the quick-start route", () => {
+  render(<MemoryRouter initialEntries={["/start"]}><App /></MemoryRouter>);
+  expect(screen.getByRole("heading", { name: /bring evidence into your coding workflow/i })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Codex" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "GitHub Copilot" })).toBeInTheDocument();
 });
 
 test("describes the three decision-ready outputs", () => {
@@ -194,16 +201,14 @@ test("uses the canonical GitHub repository URL", () => {
   );
 });
 
-test("uses the same label for both demo report calls to action", () => {
+test("keeps the demo preview call to action available from the home page", () => {
   render(
     <MemoryRouter initialEntries={["/"]}>
       <App />
     </MemoryRouter>,
   );
 
-  const links = screen.getAllByRole("link", { name: "View Demo Report" });
-  expect(links).toHaveLength(2);
-  links.forEach((link) => expect(link).toHaveAttribute("href", "/demo-report"));
+  expect(screen.getByRole("link", { name: "View Demo Report" })).toHaveAttribute("href", "/demo-report");
 });
 
 test("keeps the animated evidence signal decorative and exposes its release state", () => {

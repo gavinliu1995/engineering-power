@@ -7,11 +7,11 @@ export function Hero() {
     <section className="hero" aria-labelledby="hero-title">
       <div className="hero-layout">
         <div className="hero-content">
-          <p className="eyebrow">{siteCopy.hero.eyebrow}</p>
+          <p className="eyebrow">Evidence-backed engineering intelligence</p>
           <h1 id="hero-title">{siteCopy.hero.title}</h1>
           <p className="hero-copy">{siteCopy.hero.description}</p>
-          <Link className="button button-primary" to="/demo-report">
-            {siteCopy.hero.cta}
+          <Link className="button button-primary" to="/start">
+            Get started
           </Link>
         </div>
         <EvidenceSignalField />

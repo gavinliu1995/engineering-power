@@ -73,6 +73,31 @@ function DemoReportPage() {
   );
 }
 
+function QuickStartPage() {
+  return (
+    <main className="quick-start-page">
+      <p className="eyebrow">Quick start</p>
+      <h1>Bring evidence into your coding workflow.</h1>
+      <p className="quick-start-intro">Choose your assistant, install Engineering Power, then start a cited repository or PR analysis without connecting a new web service.</p>
+      <div className="quick-start-grid">
+        <article>
+          <span className="guide-step">01</span>
+          <h2>Codex</h2>
+          <p>Install the plugin from your personal marketplace, start a new task, then invoke a workflow against a repository or pull request.</p>
+          <code>$repo-intelligence /path/to/repository</code>
+        </article>
+        <article>
+          <span className="guide-step">02</span>
+          <h2>GitHub Copilot</h2>
+          <p>Use the same evidence-first prompt pattern in your Copilot workflow, keeping the repository or PR target explicit.</p>
+          <code>Analyze this PR with facts, inferences, unknowns, and citations.</code>
+        </article>
+      </div>
+      <Link className="button button-primary" to="/demo-report">View a demo report</Link>
+    </main>
+  );
+}
+
 function NotFoundPage() {
   return (
     <main className="not-found-page">
@@ -90,6 +115,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/demo-report" element={<DemoReportPage />} />
+      <Route path="/start" element={<QuickStartPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
