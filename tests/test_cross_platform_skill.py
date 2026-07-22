@@ -30,6 +30,25 @@ class CrossPlatformSkillTests(unittest.TestCase):
         ):
             self.assertIn(workflow, content)
 
+    def test_portable_skill_is_self_contained_for_gh_skill_install(self):
+        self.assertTrue(
+            (PORTABLE_SKILL / "scripts" / "repo_evidence" / "collect_local_context.py").is_file()
+        )
+        self.assertTrue(
+            (PORTABLE_SKILL / "scripts" / "repo_evidence" / "collect_github_context.py").is_file()
+        )
+        self.assertTrue((PORTABLE_SKILL / "references" / "report-schema.md").is_file())
+
+    def test_portable_skill_resources_are_synchronized(self):
+        completed = subprocess.run(
+            ["python3", str(ROOT / "scripts" / "sync_portable_agent_skill.py"), "--check"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+
     def test_installer_creates_host_specific_package(self):
         installer = ROOT / "scripts" / "install_agent_skill.py"
         self.assertTrue(installer.is_file(), installer)
@@ -88,7 +107,14 @@ class CrossPlatformSkillTests(unittest.TestCase):
 
     def test_readme_documents_cross_platform_installation(self):
         content = (ROOT / "README.md").read_text(encoding="utf-8")
-        for expected in ("GitHub Copilot", "Claude Code", "Cursor", "Bitbucket", "install_agent_skill.py"):
+        for expected in (
+            "GitHub Copilot",
+            "Claude Code",
+            "Cursor",
+            "Bitbucket",
+            "install_agent_skill.py",
+            "sync_portable_agent_skill.py",
+        ):
             self.assertIn(expected, content)
 
 

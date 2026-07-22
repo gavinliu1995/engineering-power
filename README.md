@@ -76,6 +76,14 @@ lives at [`.agents/skills/engineering-power`](.agents/skills/engineering-power),
 which GitHub Copilot recognizes as a project skill. The installer creates a
 self-contained copy for a chosen host.
 
+Maintainers: after changing `scripts/repo_evidence/` or `references/`, refresh
+the committed portable package before publishing or installing with GitHub CLI:
+
+```bash
+python3 scripts/sync_portable_agent_skill.py
+python3 scripts/sync_portable_agent_skill.py --check
+```
+
 From the Engineering Power repository, install into a target project directory:
 
 ```bash

@@ -11,8 +11,6 @@ import sys
 
 SOURCE_ROOT = Path(__file__).resolve().parents[1]
 SKILL_SOURCE = SOURCE_ROOT / ".agents" / "skills" / "engineering-power"
-EVIDENCE_SOURCE = SOURCE_ROOT / "scripts" / "repo_evidence"
-REFERENCE_SOURCE = SOURCE_ROOT / "references"
 
 HOST_PATHS = {
     "copilot": (".agents", "skills", "engineering-power"),
@@ -52,10 +50,10 @@ def destination_for(host: str, target_root: Path) -> Path:
 def validate_sources() -> None:
     required = (
         SKILL_SOURCE / "SKILL.md",
-        EVIDENCE_SOURCE / "collect_local_context.py",
-        EVIDENCE_SOURCE / "collect_github_context.py",
-        EVIDENCE_SOURCE / "finalize_report.py",
-        REFERENCE_SOURCE / "report-schema.md",
+        SKILL_SOURCE / "scripts" / "repo_evidence" / "collect_local_context.py",
+        SKILL_SOURCE / "scripts" / "repo_evidence" / "collect_github_context.py",
+        SKILL_SOURCE / "scripts" / "repo_evidence" / "finalize_report.py",
+        SKILL_SOURCE / "references" / "report-schema.md",
     )
     missing = [str(path) for path in required if not path.is_file()]
     if missing:
@@ -81,10 +79,8 @@ def install(host: str, target_root: Path, *, force: bool, dry_run: bool) -> Path
         else:
             destination.unlink()
 
-    destination.mkdir(parents=True, exist_ok=False)
-    shutil.copy2(SKILL_SOURCE / "SKILL.md", destination / "SKILL.md")
-    shutil.copytree(EVIDENCE_SOURCE, destination / "scripts" / "repo_evidence")
-    shutil.copytree(REFERENCE_SOURCE, destination / "references")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(SKILL_SOURCE, destination)
     print(f"installed Engineering Power for {host} at {destination}")
     return destination
 
