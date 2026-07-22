@@ -206,6 +206,18 @@ test("uses the same label for both demo report calls to action", () => {
   links.forEach((link) => expect(link).toHaveAttribute("href", "/demo-report"));
 });
 
+test("keeps the animated evidence signal decorative and exposes its release state", () => {
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  const signal = screen.getByTestId("evidence-signal-field");
+  expect(signal).toHaveAttribute("aria-hidden", "true");
+  expect(signal).toHaveTextContent("PROCEED WITH CONDITIONS");
+});
+
 test("renders the not-found page for an unmatched route", () => {
   render(
     <MemoryRouter initialEntries={["/missing"]}>
