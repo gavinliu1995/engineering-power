@@ -221,10 +221,10 @@ export const howItWorksSteps = [
 ] as const;
 
 export const supportedHosts = [
-  { id: "codex", name: "Codex", description: "Local developer preview for a configured personal marketplace." },
-  { id: "copilot", name: "GitHub Copilot", description: "Portable project skill for Copilot CLI or VS Code." },
-  { id: "claude", name: "Claude Code", description: "Portable project skill for repository-local Claude workflows." },
-  { id: "cursor", name: "Cursor", description: "Portable project skill for Cursor-assisted engineering work." },
+  { id: "codex", name: "Codex", description: "Local developer preview for a configured personal marketplace.", available: true },
+  { id: "copilot", name: "GitHub Copilot", description: "Portable project skill for Copilot CLI or VS Code.", available: true },
+  { id: "claude", name: "Claude Code", description: "Portable project skill for repository-local Claude workflows.", available: false },
+  { id: "cursor", name: "Cursor", description: "Portable project skill for Cursor-assisted engineering work.", available: false },
 ] as const;
 
 export const lifecycleStarterPrompts = [

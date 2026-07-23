@@ -42,15 +42,16 @@ test("uses the selected citation-frame brand asset", () => {
   expect(mark).toHaveAttribute("alt", "");
 });
 
-test("lets users choose every supported coding assistant from the quick-start route", () => {
+test("only links to coding assistants whose guides are available", () => {
   render(<MemoryRouter initialEntries={["/start"]}><App /></MemoryRouter>);
   expect(screen.getByRole("heading", { name: /use engineering power with your coding assistant/i })).toBeInTheDocument();
   const hostNav = screen.getByRole("navigation", { name: "Supported coding assistants" });
-  expect(within(hostNav).getAllByRole("link")).toHaveLength(4);
+  expect(within(hostNav).getAllByRole("link")).toHaveLength(2);
   expect(within(hostNav).getByRole("link", { name: "Use Engineering Power with Codex" })).toHaveAttribute("href", "/start/codex");
   expect(within(hostNav).getByRole("link", { name: "Use Engineering Power with GitHub Copilot" })).toHaveAttribute("href", "/start/copilot");
-  expect(within(hostNav).getByRole("link", { name: "Use Engineering Power with Claude Code" })).toHaveAttribute("href", "/start/claude");
-  expect(within(hostNav).getByRole("link", { name: "Use Engineering Power with Cursor" })).toHaveAttribute("href", "/start/cursor");
+  expect(within(hostNav).queryByRole("link", { name: "Use Engineering Power with Claude Code" })).not.toBeInTheDocument();
+  expect(within(hostNav).queryByRole("link", { name: "Use Engineering Power with Cursor" })).not.toBeInTheDocument();
+  expect(within(hostNav).getAllByText("Developing")).toHaveLength(2);
   expect(screen.getByText(/read-only by default/i)).toBeInTheDocument();
   expect(screen.queryByText("$repo-intelligence /path/to/repository")).not.toBeInTheDocument();
 });

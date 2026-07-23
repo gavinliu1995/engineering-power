@@ -80,19 +80,24 @@ function QuickStartPage() {
         <h1>Use Engineering Power with your coding assistant.</h1>
         <p className="quick-start-intro">Every supported host can help you understand a repository, change it safely, prepare a release, plan a migration, or investigate an incident with cited evidence. Engineering Power is read-only by default and does not merge, deploy, or change the target repository.</p>
         <nav className="assistant-choice-grid" aria-label="Supported coding assistants">
-          {supportedHosts.map((host, index) => (
-            <Link
-              key={host.id}
-              className={`assistant-choice assistant-choice-${host.id}`}
-              to={`/start/${host.id}`}
-              aria-label={`Use Engineering Power with ${host.name}`}
-            >
+          {supportedHosts.map((host, index) => {
+            const choiceContent = <>
               <span className="guide-step">Option {String(index + 1).padStart(2, "0")}</span>
               <h2>{host.name}</h2>
               <p>{host.description}</p>
-              <span className="choice-action">Open {host.name} guide</span>
-            </Link>
-          ))}
+              <span className="choice-action">{host.available ? `Open ${host.name} guide` : "Developing"}</span>
+            </>;
+
+            return host.available ? (
+              <Link key={host.id} className={`assistant-choice assistant-choice-${host.id}`} to={`/start/${host.id}`} aria-label={`Use Engineering Power with ${host.name}`}>
+                {choiceContent}
+              </Link>
+            ) : (
+              <article key={host.id} className={`assistant-choice assistant-choice-${host.id}`} aria-label={`${host.name} integration developing`}>
+                {choiceContent}
+              </article>
+            );
+          })}
         </nav>
       </main>
     </div>
