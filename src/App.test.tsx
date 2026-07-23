@@ -55,7 +55,29 @@ test("lets users choose every supported coding assistant from the quick-start ro
   expect(screen.queryByText("$repo-intelligence /path/to/repository")).not.toBeInTheDocument();
 });
 
-test.each(["/start", "/start/codex"])(
+test("states lifecycle breadth before the visitor chooses a host", () => {
+  render(<MemoryRouter initialEntries={["/start"]}><App /></MemoryRouter>);
+
+  expect(screen.getByText(/understand a repository, change it safely, prepare a release, plan a migration, or investigate an incident/i)).toBeInTheDocument();
+  expect(screen.getByRole("navigation", { name: "Supported coding assistants" })).toBeInTheDocument();
+});
+
+test.each([
+  ["/start/codex", "Codex"],
+  ["/start/copilot", "GitHub Copilot"],
+  ["/start/claude", "Claude Code"],
+  ["/start/cursor", "Cursor"],
+])("offers four lifecycle starter prompts on %s", (route, hostName) => {
+  render(<MemoryRouter initialEntries={[route]}><App /></MemoryRouter>);
+  const prompts = screen.getByRole("region", { name: `First things to try in ${hostName}` });
+
+  expect(within(prompts).getAllByRole("article")).toHaveLength(4);
+  for (const stage of ["Understand", "Change safely", "Ship clearly", "Evolve & operate"]) {
+    expect(within(prompts).getByRole("heading", { name: stage })).toBeInTheDocument();
+  }
+});
+
+test.each(["/start", "/start/codex", "/start/copilot", "/start/claude", "/start/cursor", "/demo-report"])(
   "offers a visible route back to the home page from %s",
   (route) => {
     render(<MemoryRouter initialEntries={[route]}><App /></MemoryRouter>);
@@ -66,6 +88,15 @@ test.each(["/start", "/start/codex"])(
   },
 );
 
+test("prefixes lifecycle anchors outside the home route", () => {
+  render(<MemoryRouter initialEntries={["/start"]}><App /></MemoryRouter>);
+  const nav = screen.getByRole("navigation", { name: "Primary" });
+
+  expect(within(nav).getByRole("link", { name: "Capabilities" })).toHaveAttribute("href", "/#capabilities");
+  expect(within(nav).getByRole("link", { name: "How it works" })).toHaveAttribute("href", "/#how-it-works");
+  expect(within(nav).getByRole("link", { name: "Hosts" })).toHaveAttribute("href", "/#hosts");
+});
+
 test("uses product-facing Codex guidance instead of an internal workflow name", () => {
   render(<MemoryRouter initialEntries={["/start/codex"]}><App /></MemoryRouter>);
   expect(screen.getByRole("heading", { name: /use engineering power in codex/i })).toBeInTheDocument();
@@ -73,7 +104,7 @@ test("uses product-facing Codex guidance instead of an internal workflow name", 
   expect(screen.getByText(/not a public codex install/i)).toBeInTheDocument();
   expect(screen.getByText('PLUGIN_ROOT="$HOME/Documents/engineering-power"')).toBeInTheDocument();
   expect(screen.getByText('python3 "$HOME/.codex/skills/.system/plugin-creator/scripts/update_plugin_cachebuster.py" "$PLUGIN_ROOT"')).toBeInTheDocument();
-  expect(screen.getByText(/start a new task and describe the repository or pull request/i)).toBeInTheDocument();
+  expect(screen.getByText(/start a new task and describe the repository, change, migration, or incident evidence/i)).toBeInTheDocument();
   expect(screen.getByText("codex plugin add engineering-power@personal")).toBeInTheDocument();
   expect(screen.getByText(/configured personal codex plugin source/i)).toBeInTheDocument();
   expect(screen.queryByText(/from your codex plugin marketplace/i)).not.toBeInTheDocument();

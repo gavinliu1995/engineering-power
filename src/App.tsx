@@ -10,6 +10,8 @@ import { HostOverview } from "./components/HostOverview";
 import { HowItWorks } from "./components/HowItWorks";
 import { TrustBoundary } from "./components/TrustBoundary";
 import { ScenarioDemo } from "./components/ScenarioDemo";
+import { StarterPrompts } from "./components/StarterPrompts";
+import { supportedHosts } from "./content/siteContent";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -70,38 +72,15 @@ function OnboardingHeader() {
 }
 
 function QuickStartPage() {
-  const hosts = [
-    {
-      id: "codex",
-      name: "Codex",
-      description: "Local developer preview for a configured personal marketplace.",
-    },
-    {
-      id: "copilot",
-      name: "GitHub Copilot",
-      description: "Install the portable project skill for Copilot CLI or VS Code.",
-    },
-    {
-      id: "claude",
-      name: "Claude Code",
-      description: "Install Engineering Power as a Claude Code project skill.",
-    },
-    {
-      id: "cursor",
-      name: "Cursor",
-      description: "Install Engineering Power as a Cursor project skill.",
-    },
-  ] as const;
-
   return (
     <div className="onboarding-page-shell" id="top">
       <OnboardingHeader />
       <main className="quick-start-page">
         <p className="eyebrow">Choose a host</p>
         <h1>Use Engineering Power with your coding assistant.</h1>
-        <p className="quick-start-intro">Pick your assistant for installation and a first evidence-backed analysis. Engineering Power is read-only by default and does not merge, deploy, or change the target repository.</p>
+        <p className="quick-start-intro">Every supported host can help you understand a repository, change it safely, prepare a release, plan a migration, or investigate an incident with cited evidence. Engineering Power is read-only by default and does not merge, deploy, or change the target repository.</p>
         <nav className="assistant-choice-grid" aria-label="Supported coding assistants">
-          {hosts.map((host, index) => (
+          {supportedHosts.map((host, index) => (
             <Link
               key={host.id}
               className={`assistant-choice assistant-choice-${host.id}`}
@@ -163,12 +142,12 @@ const hostGuides: Record<HostId, {
       },
       {
         title: "Start a new task",
-        description: "Start a new task and describe the repository or pull request you want Engineering Power to analyze.",
+        description: "Start a new task and describe the repository, change, migration, or incident evidence you want Engineering Power to examine.",
       },
       {
         title: "Ask a concrete question",
         description: "Request an evidence-backed answer with facts, inferences, unknowns, and file citations.",
-        code: ["Analyze this pull request with Engineering Power. Separate facts, inferences, and unknowns, with citations."],
+        code: ["Use Engineering Power to understand this repository. Map its architecture and give me a cited reading order."],
       },
     ],
   },
@@ -266,6 +245,7 @@ function HostGuidePage({ host }: { host: HostId }) {
             </li>
           ))}
         </ol>
+        <StarterPrompts hostName={supportedHosts.find((item) => item.id === host)?.name ?? guide.heading} />
         <a className="button button-primary" href="https://github.com/gavinliu1995/engineering-power" target="_blank" rel="noreferrer">Open the canonical repository</a>
       </main>
     </div>
