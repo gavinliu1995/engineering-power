@@ -1,73 +1,43 @@
 # Engineering Power
 
-Evidence-backed repository and change analysis for Codex, GitHub Copilot,
-Claude Code, and Cursor.
+Evidence-backed engineering intelligence across the software lifecycle for
+Codex, GitHub Copilot, Claude Code, and Cursor.
 
-Engineering Power helps engineers understand repositories and review changes
-without treating model intuition as source truth. It accepts GitHub repositories,
-pull requests, local Git repositories, commit comparisons, working-tree changes,
-and downloaded patches. Reports retain the analyzed Git state, source citations,
-test status, collection coverage, and explicit unknowns.
-
-## Why it exists
-
-General-purpose AI can summarize code, but engineering decisions need stronger
-evidence. Engineering Power combines a deterministic repository evidence engine
-with focused agent workflows so that material conclusions can be traced back to
-concrete files and line ranges.
-
-The product is designed around three rules:
-
-- distinguish facts, inferences, and unknowns;
-- distinguish executed tests from discovered or recommended tests;
-- return bounded partial coverage when a deadline is reached instead of silently
-  continuing or overstating completeness.
+Engineering Power helps engineers understand unfamiliar repositories, change
+code safely, ship clearly, plan migrations, and investigate runtime incidents
+without treating model intuition as source truth.
 
 ## Current capabilities
 
-The current Demo MVP includes:
+Engineering Power covers the full engineering lifecycle:
 
-| Workflow | Engineering outcome |
-| --- | --- |
-| Repository Intelligence | Architecture, business flows, build paths, risks, and onboarding guidance |
-| PR Impact Analysis | Change propagation, test impact, regression risk, and architecture review |
-| Dependency Impact Analysis | Direct and transitive consumer, build, runtime, and test impact |
-| API Contract Generator | Endpoint and schema inventory or compatibility delta |
-| Release Note Generator | Evidence-backed technical and user-facing release notes |
-| Architecture Map | Module, trust, data-ownership, integration, and business-flow maps |
-| Codebase Onboarding | Practical reading order, setup, common change locations, and test paths |
-| Migration Planner | Evidence-backed migration waves, validation gates, and rollback points |
-| Release Readiness | Test, configuration, deployment, observability, rollback, and release decision brief |
+| Stage | Integrated capabilities | Supporting workflows |
+| --- | --- | --- |
+| Understand | Repository-specific onboarding; Architecture review support | Repository Intelligence; Architecture Map; Codebase Onboarding |
+| Change safely | Repository refactoring assistance; Dependency impact analysis; Test impact analysis; Regression risk detection | PR Impact Analysis |
+| Ship clearly | API contract generation; Release note generation | Release Readiness |
+| Evolve & operate | Migration planning; Runtime incident triage | Migration Planner; Systematic Debugging |
 
-Engineering lifecycle workflows are also included for brainstorming, planning,
-test-driven development, systematic debugging, code review, verification, Git
-worktrees, and safely finishing development work.
+## Shared evidence across the lifecycle
 
-Repository refactoring assistance and runtime incident triage are planned for
-the project-validation stage. They are intentionally not presented as completed
-Demo MVP capabilities.
-
-## Golden PR workflow
-
-One exact repository or change snapshot is collected and then reused across
-derived reports:
+One exact repository, change, or incident snapshot is collected and then reused
+across lifecycle workflows:
 
 ```mermaid
 flowchart LR
-    I["GitHub PR, local Git comparison, or patch"] --> E["Shared evidence snapshot"]
-    E --> P["PR impact analysis"]
-    E --> D["Dependency impact"]
-    E --> A["API contract delta"]
-    E --> R["Release notes"]
-    P --> Q["Validated engineering report"]
-    D --> Q
-    A --> Q
-    R --> Q
-    Q --> M["Management-readable decision summary"]
+    I["Repository, change, or incident evidence"] --> E["Exact evidence snapshot"]
+    E --> U["Understand"]
+    E --> C["Change safely"]
+    E --> S["Ship clearly"]
+    E --> O["Evolve and operate"]
+    U --> D["Cited, human-owned decision"]
+    C --> D
+    S --> D
+    O --> D
 ```
 
-This avoids independently recrawling the same change and keeps all conclusions
-grounded in the same base and head state.
+This avoids independently recrawling the same evidence and keeps all conclusions
+grounded in the same exact state.
 
 ## Example usage
 
@@ -167,9 +137,9 @@ plugin and workflow product.
 
 1. **Demo MVP — prove usefulness:** demonstrate the golden PR workflow and
    evidence quality on representative repositories and changes.
-2. **Project validation — prove reliability:** add refactoring and incident
-   workflows, then measure correctness, actionability, omissions, runtime, and
-   maintainer satisfaction on real projects.
+2. **Project validation — prove reliability:** measure correctness,
+   actionability, omissions, runtime, and maintainer satisfaction across the
+   integrated lifecycle workflows on representative projects.
 3. **Plugin product — prove scalability:** add team configuration, consistent
    routing, installation and upgrade workflows, and broader internal adoption.
 
