@@ -110,7 +110,6 @@ def install(
 ) -> tuple[Path, ...]:
     sources = validate_sources()
     resolved_target_root = target_root.expanduser().resolve()
-    resolved_target_root.mkdir(parents=True, exist_ok=True)
     skills_root = destination_for(host, resolved_target_root)
     destinations = tuple(skills_root / source.name for source in sources)
 
@@ -122,6 +121,7 @@ def install(
             )
         return destinations
 
+    resolved_target_root.mkdir(parents=True, exist_ok=True)
     collisions = tuple(
         destination
         for destination in destinations
@@ -141,6 +141,7 @@ def install(
         )
     )
     backup_root = None
+    preserve_backup = False
     installed_destinations: list[Path] = []
     moved_backups: list[tuple[Path, Path]] = []
     try:
@@ -163,17 +164,35 @@ def install(
             staged = stage_root / destination.name
             staged.rename(destination)
             installed_destinations.append(destination)
-    except Exception:
+    except Exception as installation_error:
+        rollback_errors: list[str] = []
         for destination in reversed(installed_destinations):
-            if destination.exists() or destination.is_symlink():
-                remove_destination(destination)
+            try:
+                if destination.exists() or destination.is_symlink():
+                    remove_destination(destination)
+            except Exception as error:
+                rollback_errors.append(
+                    f"remove {destination}: {error}"
+                )
         for destination, backup in reversed(moved_backups):
-            if backup.exists() or backup.is_symlink():
-                backup.rename(destination)
+            try:
+                if backup.exists() or backup.is_symlink():
+                    backup.rename(destination)
+            except Exception as error:
+                rollback_errors.append(
+                    f"restore {backup} to {destination}: {error}"
+                )
+        if rollback_errors:
+            preserve_backup = True
+            details = "; ".join(rollback_errors)
+            raise RuntimeError(
+                "Engineering Power installation failed and rollback incomplete; "
+                f"backups preserved at {backup_root}. Recovery errors: {details}"
+            ) from installation_error
         raise
     finally:
         shutil.rmtree(stage_root, ignore_errors=True)
-        if backup_root is not None:
+        if backup_root is not None and not preserve_backup:
             shutil.rmtree(backup_root, ignore_errors=True)
 
     print(

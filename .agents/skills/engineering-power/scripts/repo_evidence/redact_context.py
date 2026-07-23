@@ -24,15 +24,24 @@ XML_ELEMENT = re.compile(
     re.IGNORECASE,
 )
 
+SET_COOKIE_COLLECTION = re.compile(
+    r"(?P<prefix>"
+    r"(?:\[\s*)?[\"']set[-_]?cookie[\"'](?:\s*\])?\s*[:=,]\s*"
+    r")"
+    r"(?P<value>\[[^\r\n]*\]|\([^\r\n]*\))",
+    re.IGNORECASE,
+)
+
 QUOTED_ASSIGNMENT = re.compile(
-    rf"(?P<prefix>(?<![\w-])[\"']?{SECRET_KEY}[\"']?\s*[:=,]\s*)"
+    rf"(?P<prefix>(?<![\w-])[\"']?{SECRET_KEY}[\"']?\s*[:=,]\s*"
+    rf"(?:[rubf]{{1,2}})?)"
     rf"(?P<quote>[\"'])(?P<value>.*?)(?P=quote)",
     re.IGNORECASE,
 )
 
 UNQUOTED_ASSIGNMENT = re.compile(
     rf"(?P<prefix>(?<![\w-])[\"']?{SECRET_KEY}[\"']?\s*[:=]\s*)"
-    rf"(?P<value>[^\s,;<>\"']+)",
+    rf"(?P<value>(?![rubf]{{1,2}}[\"'])[^\s,;<>\"']+)",
     re.IGNORECASE,
 )
 
@@ -78,6 +87,10 @@ def _replace_wrapped_value(match: re.Match[str]) -> str:
     return f"{match.group('prefix')}{REDACTION}{match.group('suffix')}"
 
 
+def _replace_structured_value(match: re.Match[str]) -> str:
+    return f'{match.group("prefix")}"{REDACTION}"'
+
+
 def redact_lines(lines: list[str]) -> list[str]:
     """Return redacted lines without changing their number or order."""
     redacted = []
@@ -97,6 +110,7 @@ def redact_lines(lines: list[str]) -> list[str]:
             continue
 
         value = XML_ELEMENT.sub(_replace_wrapped_value, line)
+        value = SET_COOKIE_COLLECTION.sub(_replace_structured_value, value)
         value = COOKIE_HEADER.sub(_replace_value, value)
         value = AUTHORIZATION.sub(_replace_value, value)
         value = URL_USER_INFO.sub(_replace_wrapped_value, value)

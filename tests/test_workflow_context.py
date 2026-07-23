@@ -229,7 +229,7 @@ class WorkflowContextTests(unittest.TestCase):
                     "src/OrderController.java",
                     '@GetMapping("/orders")\n'
                     f'<server password="{synthetic_secret}" />\n'
-                    f'Map.of("Set-Cookie", "session={synthetic_secret}; HttpOnly");\n'
+                    f'res.setHeader("Set-Cookie", ["session={synthetic_secret}; HttpOnly"]);\n'
                     "OrderDto list() {}\n",
                     True,
                 )

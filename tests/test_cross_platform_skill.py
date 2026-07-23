@@ -115,6 +115,7 @@ class CrossPlatformSkillTests(unittest.TestCase):
                     f"Cookie: session={literal}; preference=dark",
                     f"Set-Cookie: session={literal}; HttpOnly; Secure",
                     f'"Set-Cookie": "session={literal}; HttpOnly; Secure"',
+                    f'"Set-Cookie": ["session={literal}; HttpOnly; Secure"]',
                 )
             )
         )
@@ -476,7 +477,8 @@ class CrossPlatformSkillTests(unittest.TestCase):
     def test_installer_dry_run_does_not_create_destination(self):
         installer = ROOT / "scripts" / "install_agent_skill.py"
         with tempfile.TemporaryDirectory() as temporary:
-            target_root = Path(temporary)
+            target_root = Path(temporary) / "missing" / "project"
+            self.assertFalse(target_root.exists())
             completed = subprocess.run(
                 [
                     "python3",
@@ -493,9 +495,49 @@ class CrossPlatformSkillTests(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertFalse(target_root.exists())
             self.assertFalse((target_root / ".agents").exists())
             self.assertIn("engineering-power", completed.stdout)
             self.assertIn("pr-impact-analysis", completed.stdout)
+
+    def test_installer_preserves_backups_when_rollback_fails(self):
+        installer = load_script(
+            "agent_skill_installer_for_rollback_test",
+            ROOT / "scripts" / "install_agent_skill.py",
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            target_root = Path(temporary)
+            installer.install(
+                "copilot",
+                target_root,
+                force=False,
+                dry_run=False,
+            )
+            original_rename = Path.rename
+
+            def fail_install_and_rollback(path, target):
+                if path.parent.name.startswith(".engineering-power-stage-"):
+                    raise OSError("simulated install failure")
+                if path.parent.name.startswith(".engineering-power-backup-"):
+                    raise OSError("simulated rollback failure")
+                return original_rename(path, target)
+
+            with patch.object(Path, "rename", fail_install_and_rollback):
+                with self.assertRaisesRegex(RuntimeError, "rollback incomplete"):
+                    installer.install(
+                        "copilot",
+                        target_root,
+                        force=True,
+                        dry_run=False,
+                    )
+
+            backup_roots = tuple(
+                target_root.glob(".engineering-power-backup-*")
+            )
+            self.assertEqual(len(backup_roots), 1)
+            self.assertTrue(
+                (backup_roots[0] / "engineering-power" / "SKILL.md").is_file()
+            )
 
     def test_readme_documents_cross_platform_installation(self):
         content = (ROOT / "README.md").read_text(encoding="utf-8")

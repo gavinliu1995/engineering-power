@@ -445,6 +445,11 @@ class LocalCollectionTests(unittest.TestCase):
                 f"Set-Cookie: session={synthetic_secret}; HttpOnly; Secure",
                 f'"Set-Cookie": "session={synthetic_secret}; HttpOnly; Secure"',
                 f"'set-cookie': 'session={synthetic_secret}; SameSite=Strict'",
+                f'"Set-Cookie": ["session={synthetic_secret}; HttpOnly"]',
+                f'"Set-Cookie": ("session={synthetic_secret}; SameSite=Lax",)',
+                f'headers["Set-Cookie"] = ["session={synthetic_secret}; Secure"]',
+                f'res.setHeader("Set-Cookie", ["session={synthetic_secret}"])',
+                f'"Set-Cookie": f"session={synthetic_secret}; SameSite=Lax"',
                 f"COOKIE={synthetic_secret}",
                 f'SET_COOKIE = "{synthetic_secret}"',
                 f'set_cookie: "{synthetic_secret}"',
@@ -465,6 +470,9 @@ class LocalCollectionTests(unittest.TestCase):
         self.assertIn("-----END PRIVATE KEY-----", redacted)
         self.assertIn('"Set-Cookie": "[REDACTED]"', redacted)
         self.assertIn("'set-cookie': '[REDACTED]'", redacted)
+        self.assertIn('headers["Set-Cookie"] = "[REDACTED]"', redacted)
+        self.assertIn('res.setHeader("Set-Cookie", "[REDACTED]")', redacted)
+        self.assertIn('"Set-Cookie": f"[REDACTED]"', redacted)
         self.assertIn('SET_COOKIE = "[REDACTED]"', redacted)
         self.assertIn('set_cookie: "[REDACTED]"', redacted)
 
@@ -475,7 +483,7 @@ class LocalCollectionTests(unittest.TestCase):
             synthetic_secret = "analysis-context-dummy-secret"
             (repository / "app.py").write_text(
                 f'COOKIE = "{synthetic_secret}"\n'
-                f'headers = {{"Set-Cookie": "session={synthetic_secret}; HttpOnly"}}\n'
+                f'headers = {{"Set-Cookie": ["session={synthetic_secret}; HttpOnly"]}}\n'
                 "value = 1\n",
                 encoding="utf-8",
             )
