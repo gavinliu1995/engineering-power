@@ -135,8 +135,12 @@ plugin and workflow product.
 
 ## Delivery roadmap
 
-1. **Demo MVP — prove usefulness:** demonstrate the golden PR workflow and
-   evidence quality on representative repositories and changes.
+1. **Full-lifecycle demonstration — prove usefulness:** demonstrate how
+   Engineering Power supports **Understand**, **Change safely**, **Ship
+   clearly**, and **Evolve & operate** with evidence-backed outputs on
+   representative repositories, changes, and incidents. The golden PR workflow
+   remains one supporting **Change safely** example, rather than the product's
+   sole or default story.
 2. **Project validation — prove reliability:** measure correctness,
    actionability, omissions, runtime, and maintainer satisfaction across the
    integrated lifecycle workflows on representative projects.
@@ -146,8 +150,8 @@ plugin and workflow product.
 See
 [`docs/superpowers/specs/2026-07-15-engineering-power-capability-roadmap-design.md`](docs/superpowers/specs/2026-07-15-engineering-power-capability-roadmap-design.md)
 for the detailed capability and validation gates, and
-[`references/demo-golden-path.md`](references/demo-golden-path.md) for the Demo
-MVP execution contract.
+[`references/demo-golden-path.md`](references/demo-golden-path.md) for the
+legacy golden-PR supporting example.
 
 ## Static demo deployment
 

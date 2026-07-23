@@ -1,62 +1,34 @@
-# Task 3 — Static evidence-report demonstration
+# Task 3 Report — Accessible Capability Explorer
 
-## Scope delivered
+## Commit
 
-Implemented the static `/demo-report` route for the fictional
-`checkout-tax-rounding` pull request. The report is deliberately a presentation
-of illustrative data only: it has no form inputs, submit actions, API calls, or
-claims of live repository analysis.
+`adba0ba feat: add accessible capability explorer`
 
-The page contains:
+## Delivered
 
-- Typed `reportData` metadata, evidence findings, validation states, risks, and
-  release conditions.
-- A `Proceed with conditions` release recommendation.
-- Separate Facts, Inferences, and Unknowns sections, each rendered through the
-  shared `EvidenceSection` component.
-- Explicit illustrative-citation labels beside every code-style source path.
-- An API compatibility summary and an Executed / Discovered / Recommended
-  validation matrix.
-- Focused report styles, including narrow-screen stacking required for legible
-  report content.
+- Added a controlled `LifecycleTabs` primitive with roving tab focus and ArrowLeft, ArrowRight, Home, and End behavior.
+- Added `CapabilityExplorer`, defaulting to **Understand**, retaining all four tab panels in the DOM, and using native `hidden` for inactive panels.
+- Connected tabs and panels through stable `capability-tab-*` / `capability-panel-*` IDs.
+- Added the explorer immediately after the lifecycle overview on the home route.
+- Added dark, responsive explorer styling and accessible keyboard/panel tests.
 
-## RED
+## Changed files
 
-Added `renders distinct evidence and validation states on the demo report` to
-`src/App.test.tsx` before writing the report components.
+- `src/components/LifecycleTabs.tsx`
+- `src/components/LifecycleTabs.test.tsx`
+- `src/components/CapabilityExplorer.tsx`
+- `src/App.tsx`
+- `src/App.test.tsx`
+- `src/styles.css`
 
-Command:
+## Verification
 
-```sh
-npm test -- --run src/App.test.tsx --reporter=verbose
-```
+- RED: `npm test -- --run src/components/LifecycleTabs.test.tsx src/App.test.tsx -t "LifecycleTabs|capability explorer|visible capability"` failed as expected before implementation because the tab list/explorer did not exist.
+- Focused: `npm test -- --run src/components/LifecycleTabs.test.tsx src/App.test.tsx` — 26 passed.
+- Full: `npm test -- --run` — 33 passed.
+- Production: `npm run build` — passed (existing Vite chunk-size warning only).
+- Hygiene: `git diff --check` — passed.
 
-Result: failed as intended. The only existing report heading was `Demo report`,
-so Testing Library could not find the required `Release decision` heading. This
-confirmed the test was exercising the missing report behavior rather than a
-test setup issue.
+## Self-review
 
-## GREEN
-
-Created `ReportHeader`, `EvidenceSection`, `ValidationMatrix`, and
-`ReleaseDecision`; added the typed static data; composed the route; and added
-the report-specific styles. A pre-existing test then identified that the route
-heading no longer included `Demo report`; the header was adjusted to `Demo
-report: checkout-tax-rounding` so the established route contract remains true.
-
-Command:
-
-```sh
-npm test -- --run src/App.test.tsx --reporter=verbose && npm run build
-```
-
-Result: 7 tests passed and the TypeScript/Vite production build completed.
-
-## Constraints checked
-
-- No live analysis or online-analysis controls were added.
-- Citation text clearly says it is illustrative, and the header explicitly says
-  the demo is not live repository analysis.
-- Facts, inferences, and unknowns are visually and semantically separated.
-- Validation states distinguish executed checks from discovered gaps and
-  recommendations.
+Task scope is limited to the reusable tab primitive and homepage capability explorer. The existing lifecycle overview remains intact; Tasks 4–7 are not implemented. The explorer uses Framer Motion for subtle positional transition while preserving visible state synchronously for keyboard accessibility tests; reduced-motion uses zero-duration transitions.
