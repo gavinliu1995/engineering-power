@@ -151,6 +151,32 @@ test("exposes every assigned capability in the static lifecycle overview", () =>
   expect(screen.queryByRole("heading", { name: /a diff shows changes/i })).not.toBeInTheDocument();
 });
 
+test("defaults the capability explorer to Understand and keeps every panel mounted", () => {
+  render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+  const tabs = screen.getByRole("tablist", { name: "Engineering lifecycle capabilities" });
+
+  expect(within(tabs).getAllByRole("tab")).toHaveLength(4);
+  expect(within(tabs).getByRole("tab", { name: "Understand" })).toHaveAttribute("aria-selected", "true");
+
+  for (const id of ["understand", "change-safely", "ship-clearly", "evolve-operate"]) {
+    expect(document.getElementById(`capability-panel-${id}`)).toBeInTheDocument();
+  }
+
+  expect(document.getElementById("capability-panel-understand")).not.toHaveAttribute("hidden");
+  expect(document.getElementById("capability-panel-change-safely")).toHaveAttribute("hidden");
+});
+
+test("changes the visible capability question with the keyboard", () => {
+  render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+  const understand = screen.getByRole("tab", { name: "Understand" });
+
+  fireEvent.keyDown(understand, { key: "ArrowRight" });
+
+  expect(screen.getByRole("tab", { name: "Change safely" })).toHaveFocus();
+  expect(document.getElementById("capability-panel-change-safely")).not.toHaveAttribute("hidden");
+  expect(screen.getByText(/what should change, what depends on it/i)).toBeVisible();
+});
+
 test("renders the demo report route", () => {
   render(
     <MemoryRouter initialEntries={["/demo-report"]}>

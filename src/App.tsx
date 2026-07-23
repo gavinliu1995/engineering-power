@@ -4,6 +4,7 @@ import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { LifecycleOverview } from "./components/LifecycleOverview";
+import { CapabilityExplorer } from "./components/CapabilityExplorer";
 import { TrustBoundary } from "./components/TrustBoundary";
 import { EvidenceSection } from "./components/EvidenceSection";
 import { ReleaseDecision } from "./components/ReleaseDecision";
@@ -40,6 +41,7 @@ function HomePage() {
       <main>
         <Hero />
         <LifecycleOverview />
+        <CapabilityExplorer />
         <TrustBoundary />
       </main>
       <Footer />
