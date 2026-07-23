@@ -1,6 +1,6 @@
-import { reportData } from "../content/siteContent";
+import type { ValidationRow } from "../content/siteContent";
 
-export function ValidationMatrix() {
+export function ValidationMatrix({ rows }: { rows: readonly ValidationRow[] }) {
   return (
     <section className="validation-section" aria-labelledby="validation-title">
       <p className="eyebrow">Validation status</p>
@@ -15,7 +15,7 @@ export function ValidationMatrix() {
             </tr>
           </thead>
           <tbody>
-            {reportData.validations.map((validation) => (
+            {rows.map((validation) => (
               <tr key={validation.check}>
                 <td>
                   <strong className={`validation-state state-${validation.state.toLowerCase()}`}>

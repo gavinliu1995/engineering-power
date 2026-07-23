@@ -9,11 +9,7 @@ import { FinalCta } from "./components/FinalCta";
 import { HostOverview } from "./components/HostOverview";
 import { HowItWorks } from "./components/HowItWorks";
 import { TrustBoundary } from "./components/TrustBoundary";
-import { EvidenceSection } from "./components/EvidenceSection";
-import { ReleaseDecision } from "./components/ReleaseDecision";
-import { ReportHeader } from "./components/ReportHeader";
-import { ValidationMatrix } from "./components/ValidationMatrix";
-import { reportData } from "./content/siteContent";
+import { ScenarioDemo } from "./components/ScenarioDemo";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -57,19 +53,11 @@ function HomePage() {
 
 function DemoReportPage() {
   return (
-    <main className="report-page">
-      <ReportHeader />
-      <ReleaseDecision />
-      <section className="api-summary" aria-labelledby="api-summary-title">
-        <p className="eyebrow">API contract delta</p>
-        <h2 id="api-summary-title">Compatibility summary</h2>
-        <p>{reportData.apiCompatibility}</p>
-      </section>
-      <EvidenceSection label="Facts" tone="fact" items={reportData.facts} />
-      <EvidenceSection label="Inferences" tone="inference" items={reportData.inferences} />
-      <EvidenceSection label="Unknowns" tone="unknown" items={reportData.unknowns} />
-      <ValidationMatrix />
-    </main>
+    <div className="onboarding-page-shell" id="top">
+      <OnboardingHeader />
+      <main className="demo-page"><ScenarioDemo /></main>
+      <Footer />
+    </div>
   );
 }
 

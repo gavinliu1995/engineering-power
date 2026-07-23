@@ -209,100 +209,46 @@ test("condenses the trust boundary to four principles and a static-demo disclosu
   expect(within(trust).getByText(/does not analyze your repository/i)).toBeInTheDocument();
 });
 
-test("renders the demo report route", () => {
-  render(
-    <MemoryRouter initialEntries={["/demo-report"]}>
-      <App />
-    </MemoryRouter>,
-  );
-
-  expect(
-    screen.getByRole("heading", { name: /demo report/i }),
-  ).toBeInTheDocument();
+test("defaults the Engineering Power demo to repository understanding", () => {
+  render(<MemoryRouter initialEntries={["/demo-report"]}><App /></MemoryRouter>);
+  expect(screen.getByRole("heading", { name: "Engineering Power demo" })).toBeInTheDocument();
+  expect(screen.getByRole("tab", { name: "Understand" })).toHaveAttribute("aria-selected", "true");
+  expect(screen.getByRole("heading", { name: "Map northstar-commerce before touching checkout." })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Repository overview" })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Checkout business flow" })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Start here" })).toBeVisible();
 });
 
-test("renders distinct evidence and validation states on the demo report", () => {
-  render(
-    <MemoryRouter initialEntries={["/demo-report"]}>
-      <App />
-    </MemoryRouter>,
-  );
-
-  expect(
-    screen.getByRole("heading", { name: /release decision/i }),
-  ).toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: "Facts" })).toBeInTheDocument();
-  expect(
-    screen.getByRole("heading", { name: "Inferences" }),
-  ).toBeInTheDocument();
-  expect(
-    screen.getByRole("heading", { name: "Unknowns" }),
-  ).toBeInTheDocument();
-  expect(screen.getByText(/illustrative demo citations/i)).toBeInTheDocument();
+test("keeps the existing PR report inside Change safely", () => {
+  render(<MemoryRouter initialEntries={["/demo-report"]}><App /></MemoryRouter>);
+  fireEvent.click(screen.getByRole("tab", { name: "Change safely" }));
+  expect(screen.getByText("Pull request #482 · checkout-tax-rounding")).toBeVisible();
+  expect(screen.getByText("Proceed with conditions")).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Facts" })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Inferences" })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Unknowns" })).toBeVisible();
+  expect(screen.getByRole("table", { name: "Validation matrix" })).toBeVisible();
 });
 
-test("renders the demo report evidence snapshot metadata", () => {
-  render(
-    <MemoryRouter initialEntries={["/demo-report"]}>
-      <App />
-    </MemoryRouter>,
-  );
+test("shows release artifacts and evolve-operate outputs in their own demo panels", () => {
+  render(<MemoryRouter initialEntries={["/demo-report"]}><App /></MemoryRouter>);
+  fireEvent.click(screen.getByRole("tab", { name: "Ship clearly" }));
+  expect(screen.getByRole("heading", { name: "API compatibility" })).toBeVisible();
+  expect(screen.getByText(/Technical: tax rounding/i)).toBeVisible();
+  expect(screen.getByText(/User-facing: checkout tax totals/i)).toBeVisible();
 
-  expect(screen.getByText("Target")).toBeInTheDocument();
-  expect(
-    screen.getByText("Pull request #482 · checkout-tax-rounding"),
-  ).toBeInTheDocument();
-  expect(screen.getByText("Base")).toBeInTheDocument();
-  expect(screen.getByText("main @ 8f31c2a")).toBeInTheDocument();
-  expect(screen.getByText("Head")).toBeInTheDocument();
-  expect(
-    screen.getByText("feature/checkout-tax-rounding @ c7e194d"),
-  ).toBeInTheDocument();
-  expect(screen.getByText("Profile")).toBeInTheDocument();
-  expect(screen.getByText("Release readiness review")).toBeInTheDocument();
-  expect(screen.getByText("Evidence snapshot")).toBeInTheDocument();
-  expect(screen.getByText("8f31c2a..c7e194d")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("tab", { name: "Evolve & operate" }));
+  expect(screen.getByRole("heading", { name: "Migration waves" })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Ranked incident hypotheses" })).toBeVisible();
+  expect(screen.getByText(/one sandbox run contradicts/i)).toBeVisible();
 });
 
-test("renders confidence and affected components on the demo report", () => {
-  render(
-    <MemoryRouter initialEntries={["/demo-report"]}>
-      <App />
-    </MemoryRouter>,
-  );
-
-  expect(screen.getByRole("heading", { name: "Confidence" })).toBeInTheDocument();
-  expect(
-    screen.getByText(
-      "Moderate — core checkout behavior is evidenced; provider reconciliation remains unverified.",
-    ),
-  ).toBeInTheDocument();
-  expect(
-    screen.getByRole("heading", { name: "Affected components" }),
-  ).toBeInTheDocument();
-  expect(screen.getByText("Tax calculation")).toBeInTheDocument();
-  expect(screen.getByText("Checkout API response")).toBeInTheDocument();
-  expect(screen.getByText("Payment provider reconciliation")).toBeInTheDocument();
-});
-
-test("uses semantic table headers for the validation matrix", () => {
-  render(
-    <MemoryRouter initialEntries={["/demo-report"]}>
-      <App />
-    </MemoryRouter>,
-  );
-
-  const table = screen.getByRole("table", { name: "Validation matrix" });
-  expect(table.tagName).toBe("TABLE");
-
-  const headers = within(table).getAllByRole("columnheader");
-  expect(headers).toHaveLength(3);
-  expect(headers.map((header) => header.textContent)).toEqual([
-    "State",
-    "Check",
-    "Evidence",
-  ]);
-  headers.forEach((header) => expect(header).toHaveAttribute("scope", "col"));
+test("labels every mounted scenario as illustrative", () => {
+  render(<MemoryRouter initialEntries={["/demo-report"]}><App /></MemoryRouter>);
+  expect(screen.getAllByText("Illustrative static example")).toHaveLength(4);
+  for (const id of ["understand", "change-safely", "ship-clearly", "evolve-operate"]) {
+    expect(document.getElementById(`scenario-panel-${id}`)).toBeInTheDocument();
+  }
 });
 
 test("uses the canonical GitHub repository URL", () => {

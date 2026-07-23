@@ -268,7 +268,7 @@ export const demoScenarios: readonly DemoScenario[] = [
     nextDecision: { owner: "PR owner and reviewer", action: "Run the provider reconciliation matrix, then decide whether PR #482 can merge with staged rollout conditions." }, detailReport: reportData,
   },
   {
-    id: "ship-clearly", title: "Ship clearly", disclosure: "Illustrative static example", heading: "Turn the same change into release-ready artifacts.", target: "Pull request #482 · checkout-tax-rounding", gitState: "main @ 8f31c2a → feature/checkout-tax-rounding @ c7e194d",
+    id: "ship-clearly", title: "Ship clearly", disclosure: "Illustrative static example", heading: "Turn the same change into release-ready artifacts.", target: "checkout-tax-rounding comparison", gitState: "main @ 8f31c2a → feature/checkout-tax-rounding @ c7e194d",
     question: "Is the public contract compatible, what should the release say, and what blocks rollout?", summary: "The response shape remains compatible, but rollout depends on provider and historical-cart validation.",
     outputs: [
       { title: "API compatibility", summary: "Compatible — no endpoint, field, or type shape changes are illustrated.", items: ["POST /checkout/quote is unchanged.", "Total fields remain integer cents."] },
