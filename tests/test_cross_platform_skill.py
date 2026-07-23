@@ -114,6 +114,7 @@ class CrossPlatformSkillTests(unittest.TestCase):
                     f'COOKIE = "{literal}"',
                     f"Cookie: session={literal}; preference=dark",
                     f"Set-Cookie: session={literal}; HttpOnly; Secure",
+                    f'"Set-Cookie": "session={literal}; HttpOnly; Secure"',
                 )
             )
         )
@@ -122,6 +123,7 @@ class CrossPlatformSkillTests(unittest.TestCase):
         self.assertIn('COOKIE = "[REDACTED]"', redacted)
         self.assertIn("Cookie: [REDACTED]", redacted)
         self.assertIn("Set-Cookie: [REDACTED]", redacted)
+        self.assertIn('"Set-Cookie": "[REDACTED]"', redacted)
 
     def test_portable_skill_contract(self):
         skill = PORTABLE_SKILL / "SKILL.md"

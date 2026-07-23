@@ -443,7 +443,11 @@ class LocalCollectionTests(unittest.TestCase):
                 f"Authorization: Basic {synthetic_secret}",
                 f"Cookie: session={synthetic_secret}; preference=dark",
                 f"Set-Cookie: session={synthetic_secret}; HttpOnly; Secure",
+                f'"Set-Cookie": "session={synthetic_secret}; HttpOnly; Secure"',
+                f"'set-cookie': 'session={synthetic_secret}; SameSite=Strict'",
                 f"COOKIE={synthetic_secret}",
+                f'SET_COOKIE = "{synthetic_secret}"',
+                f'set_cookie: "{synthetic_secret}"',
                 f"https://user:{synthetic_secret}@example.test/path",
                 "-----BEGIN PRIVATE KEY-----",
                 synthetic_secret,
@@ -459,6 +463,10 @@ class LocalCollectionTests(unittest.TestCase):
         self.assertEqual(len(source.splitlines()), len(redacted.splitlines()))
         self.assertIn("-----BEGIN PRIVATE KEY-----", redacted)
         self.assertIn("-----END PRIVATE KEY-----", redacted)
+        self.assertIn('"Set-Cookie": "[REDACTED]"', redacted)
+        self.assertIn("'set-cookie': '[REDACTED]'", redacted)
+        self.assertIn('SET_COOKIE = "[REDACTED]"', redacted)
+        self.assertIn('set_cookie: "[REDACTED]"', redacted)
 
     def test_analysis_context_redacts_before_rendering_numbered_evidence(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -466,7 +474,9 @@ class LocalCollectionTests(unittest.TestCase):
             repository, _, _ = self.create_repository(root)
             synthetic_secret = "analysis-context-dummy-secret"
             (repository / "app.py").write_text(
-                f'COOKIE = "{synthetic_secret}"\nvalue = 1\n',
+                f'COOKIE = "{synthetic_secret}"\n'
+                f'headers = {{"Set-Cookie": "session={synthetic_secret}; HttpOnly"}}\n'
+                "value = 1\n",
                 encoding="utf-8",
             )
             self.git(repository, "add", "app.py")
@@ -483,7 +493,8 @@ class LocalCollectionTests(unittest.TestCase):
 
             self.assertNotIn(synthetic_secret, context)
             self.assertIn('COOKIE = "[REDACTED]"', context)
-            self.assertIn("     2 | value = 1", context)
+            self.assertIn('"Set-Cookie": "[REDACTED]"', context)
+            self.assertIn("     3 | value = 1", context)
 
     def test_analysis_context_discloses_layers_with_no_candidates(self):
         with tempfile.TemporaryDirectory() as temporary:

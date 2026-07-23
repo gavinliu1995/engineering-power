@@ -10,7 +10,8 @@ REDACTION = "[REDACTED]"
 
 SECRET_KEY = (
     r"(?:pass(?:word|wd)?|pwd|secret|token|api[_-]?key|apikey|"
-    r"access[_-]?key|client[_-]?secret|private[_-]?key|credentials?|cookie)"
+    r"access[_-]?key|client[_-]?secret|private[_-]?key|credentials?|"
+    r"set[-_]?cookie|cookie)"
 )
 
 PRIVATE_KEY_BEGIN = re.compile(r"-----BEGIN [^-]*PRIVATE KEY-----", re.IGNORECASE)
@@ -24,7 +25,7 @@ XML_ELEMENT = re.compile(
 )
 
 QUOTED_ASSIGNMENT = re.compile(
-    rf"(?P<prefix>(?<![\w-])[\"']?{SECRET_KEY}[\"']?\s*[:=]\s*)"
+    rf"(?P<prefix>(?<![\w-])[\"']?{SECRET_KEY}[\"']?\s*[:=,]\s*)"
     rf"(?P<quote>[\"'])(?P<value>.*?)(?P=quote)",
     re.IGNORECASE,
 )
