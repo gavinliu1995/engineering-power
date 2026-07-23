@@ -3,44 +3,30 @@ import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
 import App from "./App";
 
-test("renders the concrete repository-analysis promise on the home route", () => {
-  render(
-    <MemoryRouter initialEntries={["/"]}>
-      <App />
-    </MemoryRouter>,
-  );
-
-  expect(
-    screen.getByRole("heading", {
-      name: /turn code evidence into cited engineering reports/i,
-    }),
-  ).toBeInTheDocument();
-  expect(
-    screen.getByText(
-      "Engineering Power analyzes a repository, pull request, or local change and returns cited findings, explicit unknowns, and review-ready engineering reports.",
-    ),
-  ).toBeInTheDocument();
-  expect(screen.queryByText("AI-native developer platform")).not.toBeInTheDocument();
-  expect(screen.queryByText(/unify agents, reusable skills/i)).not.toBeInTheDocument();
-});
-
-test("connects the hero CTA to the quick-start guide", () => {
-  render(
-    <MemoryRouter initialEntries={["/"]}>
-      <App />
-    </MemoryRouter>,
-  );
+test("leads with full-lifecycle engineering intelligence", () => {
+  render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
 
   const hero = screen.getByRole("region", {
-    name: "Turn code evidence into cited engineering reports.",
+    name: "Engineering intelligence across the software lifecycle.",
   });
 
   expect(
-    within(hero).getByRole("link", { name: "Choose your assistant" }),
-  ).toHaveAttribute("href", "/start");
-  expect(
-    within(hero).getByRole("link", { name: "View sample report" }),
-  ).toHaveAttribute("href", "/demo-report");
+    within(hero).getByRole("heading", {
+      name: "Engineering intelligence across the software lifecycle.",
+    }),
+  ).toBeInTheDocument();
+  expect(within(hero).getByText(/understand unfamiliar repositories/i)).toBeInTheDocument();
+  expect(within(hero).queryByText(/pull request|diff|review-ready report/i)).not.toBeInTheDocument();
+});
+
+test("connects hero actions to onboarding and capabilities", () => {
+  render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+  const hero = screen.getByRole("region", {
+    name: "Engineering intelligence across the software lifecycle.",
+  });
+
+  expect(within(hero).getByRole("link", { name: "Choose your assistant" })).toHaveAttribute("href", "/start");
+  expect(within(hero).getByRole("link", { name: "Explore capabilities" })).toHaveAttribute("href", "#capabilities");
 });
 
 test("uses the selected citation-frame brand asset", () => {
@@ -142,55 +128,27 @@ test("returns to the top when moving from an assistant choice to its guide", asy
   scrollTo.mockRestore();
 });
 
-test("describes the three decision-ready outputs", () => {
-  render(
-    <MemoryRouter initialEntries={["/"]}>
-      <App />
-    </MemoryRouter>,
-  );
+test("exposes every assigned capability in the static lifecycle overview", () => {
+  render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+  const overview = screen.getByRole("region", { name: "From first read to production reality." });
 
-  expect(screen.getByText("Change Impact")).toBeInTheDocument();
-  expect(screen.getByText("API Contract Delta")).toBeInTheDocument();
-  expect(screen.getByText("Release Readiness")).toBeInTheDocument();
-});
+  for (const capability of [
+    "Repository-specific onboarding",
+    "Architecture review support",
+    "Repository refactoring assistance",
+    "Dependency impact analysis",
+    "Test impact analysis",
+    "Regression risk detection",
+    "API contract generation",
+    "Release note generation",
+    "Migration planning",
+    "Runtime incident triage",
+  ]) {
+    expect(within(overview).getByText(capability)).toBeInTheDocument();
+  }
 
-test("labels demo evidence and citations as illustrative rather than live analysis", () => {
-  render(
-    <MemoryRouter initialEntries={["/"]}>
-      <App />
-    </MemoryRouter>,
-  );
-
-  expect(
-    screen.getByText(/static demo uses illustrative evidence and citations/i),
-  ).toBeInTheDocument();
-  expect(screen.getByText(/not live repository analysis/i)).toBeInTheDocument();
-});
-
-test("makes the homepage evidence states, report excerpt, and trust limits explicit", () => {
-  render(
-    <MemoryRouter initialEntries={["/"]}>
-      <App />
-    </MemoryRouter>,
-  );
-
-  const whyItMatters = screen.getByRole("region", {
-    name: /a diff shows changes/i,
-  });
-  expect(within(whyItMatters).getByRole("heading", { name: "Facts" })).toBeInTheDocument();
-  expect(within(whyItMatters).getByRole("heading", { name: "Inferences" })).toBeInTheDocument();
-  expect(within(whyItMatters).getByRole("heading", { name: "Unknowns" })).toBeInTheDocument();
-
-  const demoPreview = screen.getByRole("region", { name: /see the evidence in report form/i });
-  expect(within(demoPreview).getByText(/proceed with conditions/i)).toBeInTheDocument();
-  expect(within(demoPreview).getByText(/taxcalculator rounds each tax line/i)).toBeInTheDocument();
-
-  const trustBoundary = screen.getByRole("region", { name: /evidence has clear limits/i });
-  expect(within(trustBoundary).getAllByRole("article")).toHaveLength(6);
-  expect(within(trustBoundary).getByText(/executed checks have observed results/i)).toBeInTheDocument();
-  expect(within(trustBoundary).getByText(/discovered and recommended checks are labeled separately/i)).toBeInTheDocument();
-  expect(within(trustBoundary).getByText(/missing or incomplete evidence stays visible/i)).toBeInTheDocument();
-  expect(screen.getByText(/static demo only — it does not analyze your repository/i)).toBeInTheDocument();
+  expect(within(overview).getAllByRole("article")).toHaveLength(4);
+  expect(screen.queryByRole("heading", { name: /a diff shows changes/i })).not.toBeInTheDocument();
 });
 
 test("renders the demo report route", () => {
@@ -304,22 +262,14 @@ test("uses the canonical GitHub repository URL", () => {
   );
 });
 
-test("uses GitHub as the direct top navigation destination", () => {
+test("uses direct lifecycle anchors and the canonical GitHub destination", () => {
   render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
-  expect(screen.getByRole("link", { name: "GitHub" })).toHaveAttribute(
-    "href",
-    "https://github.com/gavinliu1995/engineering-power",
-  );
-});
+  const nav = screen.getByRole("navigation", { name: "Primary" });
 
-test("keeps the demo preview call to action available from the home page", () => {
-  render(
-    <MemoryRouter initialEntries={["/"]}>
-      <App />
-    </MemoryRouter>,
-  );
-
-  expect(screen.getByRole("link", { name: "View Demo Report" })).toHaveAttribute("href", "/demo-report");
+  expect(within(nav).getByRole("link", { name: "Capabilities" })).toHaveAttribute("href", "#capabilities");
+  expect(within(nav).getByRole("link", { name: "How it works" })).toHaveAttribute("href", "#how-it-works");
+  expect(within(nav).getByRole("link", { name: "Hosts" })).toHaveAttribute("href", "#hosts");
+  expect(within(nav).getByRole("link", { name: "GitHub" })).toHaveAttribute("href", "https://github.com/gavinliu1995/engineering-power");
 });
 
 test("keeps the intelligence flow field decorative", () => {

@@ -1,16 +1,5 @@
-export type Output = {
-  title: string;
-  description: string;
-  detail: string;
-};
-
 export type TrustBoundary = {
   title: string;
-  description: string;
-};
-
-export type EvidenceState = {
-  label: "Facts" | "Inferences" | "Unknowns";
   description: string;
 };
 
@@ -312,46 +301,6 @@ export const demoScenarios: readonly DemoScenario[] = [
   },
 ];
 
-export const evidenceFlow = [
-  "Repository, PR, local comparison, working tree, or patch",
-  "One bounded evidence snapshot",
-  "Cited engineering analysis",
-  "Human review and decision",
-];
-
-export const outputs: Output[] = [
-  {
-    title: "Change Impact",
-    description: "Trace evidenced code, configuration, and test relationships.",
-    detail: "Keep inferred runtime impact clearly labeled for reviewers.",
-  },
-  {
-    title: "API Contract Delta",
-    description: "Describe discovered API surface changes and compatibility risks.",
-    detail: "Keep missing evidence visible instead of implying a guarantee.",
-  },
-  {
-    title: "Release Readiness",
-    description: "Summarize evidence, validation status, risks, and release conditions.",
-    detail: "Give people a cited brief for the final release decision.",
-  },
-];
-
-export const homepageEvidenceStates: readonly EvidenceState[] = [
-  {
-    label: "Facts",
-    description: "Observed code, configuration, and test evidence tied to the analyzed snapshot.",
-  },
-  {
-    label: "Inferences",
-    description: "Reasoned implications that stay separate from the evidence supporting them.",
-  },
-  {
-    label: "Unknowns",
-    description: "Questions the available evidence cannot establish, kept visible for reviewers.",
-  },
-];
-
 export const trustBoundaries: TrustBoundary[] = [
   {
     title: "Static demo, clear boundary",
@@ -422,38 +371,6 @@ export const siteCopy = {
       title: "Bring Engineering Power to your coding assistant.",
       cta: "Choose your assistant",
     },
-  },
-  hero: {
-    eyebrow: "Evidence-backed repository and change analysis",
-    title: "Turn code evidence into cited engineering reports.",
-    description:
-      "Engineering Power analyzes a repository, pull request, or local change and returns cited findings, explicit unknowns, and review-ready engineering reports.",
-    cta: "Choose your assistant",
-  },
-  whyItMatters: {
-    title: "A diff shows changes. Reviewers still need the impact.",
-    description:
-      "Engineering Power separates observed facts, reasoned inferences, and unanswered questions. It also distinguishes checks that ran from tests it found or recommends.",
-  },
-  flow: {
-    eyebrow: "One evidence snapshot",
-    title: "Analyze once. Reuse the evidence.",
-  },
-  outputs: {
-    eyebrow: "Cited review inputs",
-    title: "Useful reports without false certainty.",
-  },
-  demo: {
-    title: "See the evidence in report form.",
-    description:
-      "Explore a static example of a concise, cited engineering narrative.",
-    excerpt: {
-      label: "Report excerpt · checkout-tax-rounding",
-      recommendation: "Proceed with conditions",
-      fact: "TaxCalculator rounds each tax line before adding it to the order total.",
-      citation: "src/checkout/TaxCalculator.ts:L42-L61",
-    },
-    cta: "View Demo Report",
   },
   trust: {
     eyebrow: "Trust boundary",

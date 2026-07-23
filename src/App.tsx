@@ -1,16 +1,15 @@
 import { useEffect, useRef } from "react";
 import { Link, Route, Routes, useLocation } from "react-router-dom";
-import { EvidenceFlow } from "./components/EvidenceFlow";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
-import { OutputCards } from "./components/OutputCards";
+import { LifecycleOverview } from "./components/LifecycleOverview";
 import { TrustBoundary } from "./components/TrustBoundary";
 import { EvidenceSection } from "./components/EvidenceSection";
 import { ReleaseDecision } from "./components/ReleaseDecision";
 import { ReportHeader } from "./components/ReportHeader";
 import { ValidationMatrix } from "./components/ValidationMatrix";
-import { homepageEvidenceStates, reportData, siteCopy } from "./content/siteContent";
+import { reportData } from "./content/siteContent";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -40,37 +39,7 @@ function HomePage() {
       </div>
       <main>
         <Hero />
-        <section className="why-section" aria-labelledby="why-title">
-          <p className="eyebrow">Why it matters</p>
-          <h2 id="why-title">{siteCopy.whyItMatters.title}</h2>
-          <p>{siteCopy.whyItMatters.description}</p>
-          <div className="evidence-state-grid">
-            {homepageEvidenceStates.map((state) => (
-              <article key={state.label} className={`evidence-state evidence-state-${state.label.toLowerCase()}`}>
-                <h3>{state.label}</h3>
-                <p>{state.description}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-        <EvidenceFlow />
-        <OutputCards />
-        <section className="demo-section" aria-labelledby="demo-title">
-          <div>
-            <p className="eyebrow">Demo preview</p>
-            <h2 id="demo-title">{siteCopy.demo.title}</h2>
-            <p>{siteCopy.demo.description}</p>
-            <article className="demo-excerpt" aria-label="Compact report excerpt">
-              <p className="demo-excerpt-label">{siteCopy.demo.excerpt.label}</p>
-              <p className="demo-excerpt-decision">{siteCopy.demo.excerpt.recommendation}</p>
-              <p>{siteCopy.demo.excerpt.fact}</p>
-              <code>{siteCopy.demo.excerpt.citation}</code>
-            </article>
-          </div>
-          <Link className="button button-secondary" to="/demo-report">
-            {siteCopy.demo.cta}
-          </Link>
-        </section>
+        <LifecycleOverview />
         <TrustBoundary />
       </main>
       <Footer />
@@ -99,7 +68,7 @@ function DemoReportPage() {
 function OnboardingHeader() {
   return (
     <div className="onboarding-header-shell">
-      <Header homeHref="/" />
+      <Header homeHref="/" anchorPrefix="/" />
     </div>
   );
 }

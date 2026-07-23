@@ -2,9 +2,10 @@ import { siteCopy } from "../content/siteContent";
 
 type HeaderProps = {
   homeHref?: string;
+  anchorPrefix?: "" | "/";
 };
 
-export function Header({ homeHref = "#top" }: HeaderProps) {
+export function Header({ homeHref = "#top", anchorPrefix = "" }: HeaderProps) {
   return (
     <header className="site-header">
       <a className="brand" href={homeHref} aria-label={`${siteCopy.brand} home`}>
@@ -18,14 +19,12 @@ export function Header({ homeHref = "#top" }: HeaderProps) {
         />
         {siteCopy.brand}
       </a>
-      <a
-        className="header-link"
-        href="https://github.com/gavinliu1995/engineering-power"
-        target="_blank"
-        rel="noreferrer"
-      >
-        GitHub
-      </a>
+      <nav className="site-nav" aria-label="Primary">
+        <a href={`${anchorPrefix}#capabilities`}>Capabilities</a>
+        <a href={`${anchorPrefix}#how-it-works`}>How it works</a>
+        <a href={`${anchorPrefix}#hosts`}>Hosts</a>
+        <a href={siteCopy.footer.githubUrl} target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
     </header>
   );
 }
