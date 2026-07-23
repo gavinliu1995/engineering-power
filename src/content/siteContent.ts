@@ -303,34 +303,20 @@ export const demoScenarios: readonly DemoScenario[] = [
 
 export const trustBoundaries: TrustBoundary[] = [
   {
-    title: "Static demo, clear boundary",
-    description:
-      "This static demo uses illustrative evidence and citations. It is not live repository analysis.",
+    title: "Exact state, cited evidence",
+    description: "Material conclusions stay tied to citations from an exact Git state.",
   },
   {
-    title: "Evidence stays specific",
-    description:
-      "Material technical claims cite the analyzed snapshot, while limitations remain explicit.",
+    title: "Claims keep their labels",
+    description: "Facts, inferences, and unknowns remain separate instead of collapsing into certainty.",
   },
   {
-    title: "Validation states stay distinct",
-    description:
-      "Executed checks have observed results. Discovered and recommended checks are labeled separately, not presented as completed validation.",
+    title: "Checks keep their status",
+    description: "Executed, discovered, and recommended checks never masquerade as the same thing.",
   },
   {
-    title: "Missing evidence stays visible",
-    description:
-      "Missing or incomplete evidence stays visible instead of being converted into certainty.",
-  },
-  {
-    title: "Read-only by default",
-    description:
-      "Target repositories stay read-only unless you separately authorize an implementation workflow.",
-  },
-  {
-    title: "Decisions stay yours",
-    description:
-      "Engineering Power frames the evidence; your team owns the final call.",
+    title: "Humans own the decision",
+    description: "Targets stay read-only by default; your engineer owns the change, migration, incident, or release call.",
   },
 ];
 
@@ -375,6 +361,7 @@ export const siteCopy = {
   trust: {
     eyebrow: "Trust boundary",
     title: "Evidence has clear limits.",
+    disclosure: "Static demo only — this website does not analyze your repository.",
   },
   footer: {
     githubLabel: "View Engineering Power on GitHub",

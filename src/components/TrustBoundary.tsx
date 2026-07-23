@@ -15,6 +15,7 @@ export function TrustBoundary() {
           </article>
         ))}
       </div>
+      <p className="static-demo-disclosure">{siteCopy.trust.disclosure}</p>
     </section>
   );
 }

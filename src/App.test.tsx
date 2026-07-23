@@ -177,6 +177,38 @@ test("changes the visible capability question with the keyboard", () => {
   expect(screen.getByText(/what should change, what depends on it/i)).toBeVisible();
 });
 
+test("explains the evidence workflow and installed-skill boundary", () => {
+  render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+  const workflow = screen.getByRole("region", { name: "Evidence in. Engineering judgment out." });
+  expect(within(workflow).getAllByRole("listitem")).toHaveLength(4);
+  expect(within(workflow).getByText(/records the Git state/i)).toBeInTheDocument();
+
+  const boundary = within(workflow).getByRole("complementary", { name: "Where analysis runs" });
+  expect(boundary).toHaveTextContent(/website is a static demo/i);
+  expect(boundary).toHaveTextContent(/runs inside your chosen coding assistant/i);
+});
+
+test("shows all supported hosts and a complete conversion path", () => {
+  render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+  const hosts = screen.getByRole("region", { name: "Bring the same engineering discipline to your assistant." });
+  for (const host of ["Codex", "GitHub Copilot", "Claude Code", "Cursor"]) {
+    expect(within(hosts).getByRole("heading", { name: host })).toBeInTheDocument();
+  }
+  expect(within(hosts).getByRole("link", { name: "Choose your assistant" })).toHaveAttribute("href", "/start");
+  expect(screen.getByRole("link", { name: /Bring Engineering Power to your coding assistant/i })).toHaveAttribute("href", "/start");
+});
+
+test("condenses the trust boundary to four principles and a static-demo disclosure", () => {
+  render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+  const trust = screen.getByRole("region", { name: "Evidence has clear limits." });
+  expect(within(trust).getAllByRole("article")).toHaveLength(4);
+  expect(within(trust).getByText(/exact Git state/i)).toBeInTheDocument();
+  expect(within(trust).getByText(/facts, inferences, and unknowns/i)).toBeInTheDocument();
+  expect(within(trust).getByText(/executed, discovered, and recommended/i)).toBeInTheDocument();
+  expect(within(trust).getByText(/read-only by default/i)).toBeInTheDocument();
+  expect(within(trust).getByText(/does not analyze your repository/i)).toBeInTheDocument();
+});
+
 test("renders the demo report route", () => {
   render(
     <MemoryRouter initialEntries={["/demo-report"]}>
