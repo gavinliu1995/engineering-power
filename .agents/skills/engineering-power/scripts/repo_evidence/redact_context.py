@@ -128,6 +128,41 @@ def _collection_end(
     return None, depth
 
 
+def _redact_regular_line(
+    line: str,
+) -> tuple[str, tuple[str, str, int] | None]:
+    value = XML_ELEMENT.sub(_replace_wrapped_value, line)
+    value = SET_COOKIE_COLLECTION.sub(_replace_structured_value, value)
+    structured_collection = None
+    collection_start = SET_COOKIE_COLLECTION_START.search(value)
+    if collection_start is not None:
+        opener = collection_start.group("open")
+        closer = "]" if opener == "[" else ")"
+        close_index, depth = _collection_end(
+            collection_start.group("tail"),
+            opener,
+            closer,
+            1,
+        )
+        value = (
+            value[: collection_start.start()]
+            + collection_start.group("prefix")
+            + f'"{REDACTION}"'
+        )
+        if close_index is None:
+            structured_collection = (opener, closer, depth)
+        else:
+            value += collection_start.group("tail")[close_index + 1 :]
+    value = COOKIE_HEADER.sub(_replace_value, value)
+    value = AUTHORIZATION.sub(_replace_value, value)
+    value = URL_USER_INFO.sub(_replace_wrapped_value, value)
+    value = CLI_QUOTED.sub(_replace_quoted_value, value)
+    value = CLI_UNQUOTED.sub(_replace_value, value)
+    value = QUOTED_ASSIGNMENT.sub(_replace_quoted_value, value)
+    value = UNQUOTED_ASSIGNMENT.sub(_replace_value, value)
+    return value, structured_collection
+
+
 def redact_lines(lines: list[str]) -> list[str]:
     """Return redacted lines without changing their number or order."""
     redacted = []
@@ -143,8 +178,8 @@ def redact_lines(lines: list[str]) -> list[str]:
                 structured_collection = (opener, closer, depth)
             else:
                 suffix = line[close_index + 1 :]
-                redacted.append(f"{indentation}{REDACTION}{suffix}")
-                structured_collection = None
+                safe_suffix, structured_collection = _redact_regular_line(suffix)
+                redacted.append(f"{indentation}{REDACTION}{safe_suffix}")
             continue
 
         if PRIVATE_KEY_BEGIN.search(line):
@@ -160,34 +195,7 @@ def redact_lines(lines: list[str]) -> list[str]:
                 redacted.append(f"{indentation}{REDACTION}" if line else REDACTION)
             continue
 
-        value = XML_ELEMENT.sub(_replace_wrapped_value, line)
-        value = SET_COOKIE_COLLECTION.sub(_replace_structured_value, value)
-        collection_start = SET_COOKIE_COLLECTION_START.search(value)
-        if collection_start is not None:
-            opener = collection_start.group("open")
-            closer = "]" if opener == "[" else ")"
-            close_index, depth = _collection_end(
-                collection_start.group("tail"),
-                opener,
-                closer,
-                1,
-            )
-            value = (
-                value[: collection_start.start()]
-                + collection_start.group("prefix")
-                + f'"{REDACTION}"'
-            )
-            if close_index is None:
-                structured_collection = (opener, closer, depth)
-            else:
-                value += collection_start.group("tail")[close_index + 1 :]
-        value = COOKIE_HEADER.sub(_replace_value, value)
-        value = AUTHORIZATION.sub(_replace_value, value)
-        value = URL_USER_INFO.sub(_replace_wrapped_value, value)
-        value = CLI_QUOTED.sub(_replace_quoted_value, value)
-        value = CLI_UNQUOTED.sub(_replace_value, value)
-        value = QUOTED_ASSIGNMENT.sub(_replace_quoted_value, value)
-        value = UNQUOTED_ASSIGNMENT.sub(_replace_value, value)
+        value, structured_collection = _redact_regular_line(line)
         redacted.append(value)
     return redacted
 

@@ -231,7 +231,7 @@ class WorkflowContextTests(unittest.TestCase):
                     f'<server password="{synthetic_secret}" />\n'
                     'res.setHeader("Set-Cookie", [\n'
                     f'    "session={synthetic_secret}; HttpOnly",\n'
-                    "]);\n"
+                    f']); String password = "{synthetic_secret}";\n'
                     "OrderDto list() {}\n",
                     True,
                 )

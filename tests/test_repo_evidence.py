@@ -451,7 +451,7 @@ class LocalCollectionTests(unittest.TestCase):
                 f'res.setHeader("Set-Cookie", ["session={synthetic_secret}"])',
                 'res.setHeader("Set-Cookie", [',
                 f'    "session={synthetic_secret}; Secure",',
-                "])",
+                f']), password = "{synthetic_secret}"',
                 f'"Set-Cookie": f"session={synthetic_secret}; SameSite=Lax"',
                 f"COOKIE={synthetic_secret}",
                 f'SET_COOKIE = "{synthetic_secret}"',
@@ -488,7 +488,7 @@ class LocalCollectionTests(unittest.TestCase):
                 f'COOKIE = "{synthetic_secret}"\n'
                 'headers = {"Set-Cookie": [\n'
                 f'    "session={synthetic_secret}; HttpOnly",\n'
-                "]}\n"
+                f'], "password": "{synthetic_secret}"}}\n'
                 "value = 1\n",
                 encoding="utf-8",
             )
