@@ -1,5 +1,10 @@
 # 跨平台 Agent Skills 迁移设计
 
+> **状态：已被完整迁移设计取代。** 本文记录最初的单一总入口方案。
+> 当前实现与维护规则以
+> [`2026-07-23-copilot-full-skill-parity-design.md`](2026-07-23-copilot-full-skill-parity-design.md)
+> 为准：20 个独立 Skills 加 1 个共享 router/runtime core。
+
 ## 目标
 
 将 Engineering Power 优先迁移为可在 GitHub Copilot 中使用的 Agent Skill；

@@ -71,13 +71,17 @@ grounded in the same base and head state.
 
 ## Cross-platform installation
 
-Engineering Power is packaged as a standard Agent Skill. The portable source
-lives at [`.agents/skills/engineering-power`](.agents/skills/engineering-power),
-which GitHub Copilot recognizes as a project skill. The installer creates a
-self-contained copy for a chosen host.
+Engineering Power ships as a suite of **20 individual Skills** plus one
+`engineering-power` router and shared runtime core. GitHub Copilot, Claude Code,
+and Cursor can discover each workflow separately—for example
+`.agents/skills/pr-impact-analysis`—or use the router when the required workflow
+is not yet known.
 
-Maintainers: after changing `scripts/repo_evidence/` or `references/`, refresh
-the committed portable package before publishing or installing with GitHub CLI:
+The root [`skills/`](skills) directory is the canonical source shared with the
+Codex Plugin. The 20 host-neutral copies under [`.agents/skills`](.agents/skills)
+are generated artifacts; do not edit them directly. After changing a canonical
+Skill, `scripts/repo_evidence/`, or `references/`, refresh and verify the
+committed suite:
 
 ```bash
 python3 scripts/sync_portable_agent_skill.py
@@ -100,16 +104,23 @@ python3 scripts/install_agent_skill.py --host cursor --target-root /path/to/proj
 The created locations are respectively:
 
 ```text
-/path/to/project/.agents/skills/engineering-power
-/path/to/project/.claude/skills/engineering-power
-/path/to/project/.cursor/skills/engineering-power
+/path/to/project/.agents/skills/       # GitHub Copilot
+/path/to/project/.claude/skills/       # Claude Code
+/path/to/project/.cursor/skills/       # Cursor
 ```
 
-For GitHub Copilot CLI, start or reload a session and verify the package:
+Each host Skills root receives the same **21 directories**. Installation
+preserves unrelated Skills; `--force` replaces only Engineering Power's managed
+suite.
+
+For GitHub Copilot CLI, start or reload a session and verify both the router and
+the individual Skills:
 
 ```text
 /skills reload
+/skills list
 /skills info engineering-power
+/skills info pr-impact-analysis
 ```
 
 GitHub Copilot, Claude Code, and Cursor can all run the local Git workflows:
@@ -121,9 +132,8 @@ company VPN.
 
 ## Example usage
 
-Select the Engineering Power skill from your agent host, or invoke
-`/engineering-power` where slash invocation is available, then provide a
-target:
+Select an individual Engineering Power Skill from your agent host. Use the
+`engineering-power` router only when you want the host to choose the workflow:
 
 ```text
 $repo-intelligence /path/to/repository
@@ -225,10 +235,11 @@ context selection, and specialized report contracts.
 ## Architecture
 
 ```text
-skills/                 User-invoked engineering workflows
-.agents/skills/         Standard portable Agent Skill entry point
+skills/                 Canonical source for 20 Codex Plugin Skills
+.agents/skills/         Generated 20 Agent Skills plus router/runtime core
 scripts/repo_evidence/  Deterministic GitHub, local Git, diff, cache, and validation engine
-scripts/install_agent_skill.py  Host-specific portable-skill installer
+scripts/sync_portable_agent_skill.py  Canonical-to-portable deterministic generator
+scripts/install_agent_skill.py  Host-specific 21-Skill suite installer
 references/             Evidence rules, report schemas, and workflow guidance
 tests/                  Plugin, collector, cache, report, and skill-contract tests
 ```
