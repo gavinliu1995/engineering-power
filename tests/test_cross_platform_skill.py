@@ -116,6 +116,9 @@ class CrossPlatformSkillTests(unittest.TestCase):
                     f"Set-Cookie: session={literal}; HttpOnly; Secure",
                     f'"Set-Cookie": "session={literal}; HttpOnly; Secure"',
                     f'"Set-Cookie": ["session={literal}; HttpOnly; Secure"]',
+                    'res.setHeader("Set-Cookie", [',
+                    f'    "session={literal}; HttpOnly; Secure",',
+                    "])",
                 )
             )
         )

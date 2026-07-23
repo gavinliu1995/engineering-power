@@ -229,7 +229,9 @@ class WorkflowContextTests(unittest.TestCase):
                     "src/OrderController.java",
                     '@GetMapping("/orders")\n'
                     f'<server password="{synthetic_secret}" />\n'
-                    f'res.setHeader("Set-Cookie", ["session={synthetic_secret}; HttpOnly"]);\n'
+                    'res.setHeader("Set-Cookie", [\n'
+                    f'    "session={synthetic_secret}; HttpOnly",\n'
+                    "]);\n"
                     "OrderDto list() {}\n",
                     True,
                 )
@@ -244,7 +246,7 @@ class WorkflowContextTests(unittest.TestCase):
         self.assertNotIn(synthetic_secret, context)
         self.assertIn('password="[REDACTED]"', context)
         self.assertIn('"Set-Cookie", "[REDACTED]"', context)
-        self.assertIn("     4 | OrderDto list() {}", context)
+        self.assertIn("     6 | OrderDto list() {}", context)
 
 
 if __name__ == "__main__":

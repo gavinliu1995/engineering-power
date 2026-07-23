@@ -449,6 +449,9 @@ class LocalCollectionTests(unittest.TestCase):
                 f'"Set-Cookie": ("session={synthetic_secret}; SameSite=Lax",)',
                 f'headers["Set-Cookie"] = ["session={synthetic_secret}; Secure"]',
                 f'res.setHeader("Set-Cookie", ["session={synthetic_secret}"])',
+                'res.setHeader("Set-Cookie", [',
+                f'    "session={synthetic_secret}; Secure",',
+                "])",
                 f'"Set-Cookie": f"session={synthetic_secret}; SameSite=Lax"',
                 f"COOKIE={synthetic_secret}",
                 f'SET_COOKIE = "{synthetic_secret}"',
@@ -483,7 +486,9 @@ class LocalCollectionTests(unittest.TestCase):
             synthetic_secret = "analysis-context-dummy-secret"
             (repository / "app.py").write_text(
                 f'COOKIE = "{synthetic_secret}"\n'
-                f'headers = {{"Set-Cookie": ["session={synthetic_secret}; HttpOnly"]}}\n'
+                'headers = {"Set-Cookie": [\n'
+                f'    "session={synthetic_secret}; HttpOnly",\n'
+                "]}\n"
                 "value = 1\n",
                 encoding="utf-8",
             )
@@ -502,7 +507,7 @@ class LocalCollectionTests(unittest.TestCase):
             self.assertNotIn(synthetic_secret, context)
             self.assertIn('COOKIE = "[REDACTED]"', context)
             self.assertIn('"Set-Cookie": "[REDACTED]"', context)
-            self.assertIn("     3 | value = 1", context)
+            self.assertIn("     5 | value = 1", context)
 
     def test_analysis_context_discloses_layers_with_no_candidates(self):
         with tempfile.TemporaryDirectory() as temporary:
