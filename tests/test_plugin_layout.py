@@ -55,8 +55,17 @@ DISPLAY_NAMES = {
 }
 
 
+def find_skill(name: str) -> Path:
+    """Find a Codex-visible flat skill entrypoint by name."""
+    candidate = ROOT / "skills" / name
+    if candidate.is_dir() and (candidate / "SKILL.md").is_file():
+        return candidate
+    raise FileNotFoundError(f"Skill '{name}' not found in skills/")
+
+
 def openai_interface(skill):
-    path = ROOT / "skills" / skill / "agents" / "openai.yaml"
+    skill_dir = find_skill(skill)
+    path = skill_dir / "agents" / "openai.yaml"
     if not path.is_file():
         return None, path
     values = dict(
@@ -75,7 +84,8 @@ class PluginLayoutTests(unittest.TestCase):
         self.assertTrue(manifest.is_file())
         self.assertEqual(json.loads(manifest.read_text(encoding="utf-8"))["name"], "engineering-power")
         for workflow in USER_WORKFLOWS | SUPPORT_WORKFLOWS:
-            self.assertTrue((ROOT / "skills" / workflow / "SKILL.md").is_file())
+            skill_dir = find_skill(workflow)
+            self.assertTrue((skill_dir / "SKILL.md").is_file())
 
     def test_repo_workflows_describe_shared_evidence_engine(self):
         for workflow in (
@@ -86,7 +96,8 @@ class PluginLayoutTests(unittest.TestCase):
             "release-readiness",
             "migration-planner",
         ):
-            content = (ROOT / "skills" / workflow / "SKILL.md").read_text(encoding="utf-8")
+            skill_dir = find_skill(workflow)
+            content = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("shared", content.lower())
 
     def test_shared_evidence_scripts_are_present(self):

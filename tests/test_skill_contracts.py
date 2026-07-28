@@ -6,8 +6,16 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def find_skill(name: str) -> Path:
+    """Find a Codex-visible flat skill entrypoint by name."""
+    candidate = ROOT / "skills" / name
+    if candidate.is_dir() and (candidate / "SKILL.md").is_file():
+        return candidate
+    raise FileNotFoundError(f"Skill '{name}' not found in skills/")
+
+
 def skill_text(name):
-    return (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+    return (find_skill(name) / "SKILL.md").read_text(encoding="utf-8")
 
 
 def plugin_manifest():

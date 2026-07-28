@@ -77,16 +77,17 @@ and Cursor can discover each workflow separately—for example
 `.agents/skills/pr-impact-analysis`—or use the router when the required workflow
 is not yet known.
 
-The root [`skills/`](skills) directory is the canonical source shared with the
-Codex Plugin. The 20 host-neutral copies under [`.agents/skills`](.agents/skills)
-are generated artifacts; do not edit them directly. After changing a canonical
-Skill, `scripts/repo_evidence/`, or `references/`, refresh and verify the
-committed suite:
+The [`skills/`](skills) directory is the single canonical source: one flat
+directory per skill (real files, no category buckets, no symlinks). It is also
+the Codex Plugin validation entrypoint, so no duplicate skill content is
+committed. For local development, symlink skills to host discovery paths:
 
 ```bash
-python3 scripts/sync_portable_agent_skill.py
-python3 scripts/sync_portable_agent_skill.py --check
+scripts/link-skills.sh
 ```
+
+This links the flat suite into `~/.agents/skills`, `~/.claude/skills`, and
+`~/.cursor/skills` for local Copilot/Codex, Claude Code, and Cursor use.
 
 From the Engineering Power repository, install into a target project directory:
 
@@ -109,7 +110,7 @@ The created locations are respectively:
 /path/to/project/.cursor/skills/       # Cursor
 ```
 
-Each host Skills root receives the same **21 directories**. Installation
+Each host Skills root receives the full flattened suite. Installation
 preserves unrelated Skills; `--force` replaces only Engineering Power's managed
 suite.
 
@@ -223,25 +224,25 @@ context selection, and specialized report contracts.
 - **Review cadence:** review quarterly, before each team release, and after a
   material GitHub Copilot, Claude Code, Cursor, or Codex skill-format change.
 - **Release checklist:**
-  1. Run `python3 scripts/sync_portable_agent_skill.py --check`.
-  2. Run the full deterministic test suite and both Skill and Plugin validators.
-  3. Install the portable package in a clean target and run a local-repository
-     and change-analysis smoke test.
-  4. Confirm no credentials, private keys, source snapshots, or local worktree
+  1. Run `python3 -m unittest discover -s tests -v`.
+  2. Install into a temp directory and smoke-test a local-repository analysis.
+  3. Confirm no credentials, private keys, source snapshots, or local worktree
      payloads are tracked.
-  5. Record known limitations and require human review before expanding write
+  4. Record known limitations and require human review before expanding write
      permissions or team rollout.
 
 ## Architecture
 
 ```text
-skills/                 Canonical source for 20 Codex Plugin Skills
-.agents/skills/         Generated 20 Agent Skills plus router/runtime core
-scripts/repo_evidence/  Deterministic GitHub, local Git, diff, cache, and validation engine
-scripts/sync_portable_agent_skill.py  Canonical-to-portable deterministic generator
-scripts/install_agent_skill.py  Host-specific 21-Skill suite installer
+skills/                 Single canonical source: one flat directory per skill
+                        (analysis, delivery, engineering, orchestration workflows)
+                        also the Codex Plugin validation entrypoint
+.agents/                Governance docs only (conventions.md, ADRs)
+scripts/repo_evidence/  Deterministic evidence engine
+scripts/link-skills.sh  Symlink skills to host discovery paths for local dev
+scripts/install_agent_skill.py  Generates portable suite on-the-fly for target projects
 references/             Evidence rules, report schemas, and workflow guidance
-tests/                  Plugin, collector, cache, report, and skill-contract tests
+tests/                  Plugin, installer, evidence, and skill-contract tests
 ```
 
 The shared evidence engine remains internally identifiable as RepoLens where

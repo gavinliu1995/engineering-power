@@ -1,0 +1,12 @@
+---
+description: Use Engineering Power skills for evidence-backed repository, change, planning, review, and release workflows.
+alwaysApply: false
+---
+
+# Engineering Power
+
+Engineering Power skills are installed for Cursor under `.cursor/skills/<skill-name>/SKILL.md`.
+
+When a request matches an Engineering Power workflow, prefer the corresponding skill from the local `skills/` suite and keep analysis grounded in repository evidence. Do not bypass the shared evidence engine for repository, pull-request, comparison, working-tree, or patch analysis.
+
+The canonical source in this repository is the flat `skills/` directory. Generated or host-specific skill packages must not be committed back into this repository.
